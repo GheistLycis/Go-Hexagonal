@@ -2,7 +2,11 @@ module Go-Hexagonal
 
 go 1.24.1
 
-require github.com/gin-gonic/gin v1.10.0
+require (
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
+	github.com/gin-gonic/gin v1.10.0
+	github.com/satori/go.uuid v1.2.0
+)
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect

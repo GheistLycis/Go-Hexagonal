@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	api.Init(8000)	
-	event.Init()	
+	api.Init(8000)
+	event.Init()
 }
