@@ -3,38 +3,121 @@ package db
 import (
 	app "Go-Hexagonal/app/user"
 	"time"
+
+	"gorm.io/gorm"
 )
 
-type UserRepo struct{}
+type UserRepo struct {
+	conn *gorm.DB
+}
 
-func NewUserRepo() *UserRepo {
-	return &UserRepo{}
+func NewUserRepo(c *gorm.DB) *UserRepo {
+	return &UserRepo{conn: c}
 }
 
 type UserModel struct {
-	ID        string     `db:"id"`
-	Status    app.Status `db:"status"`
-	Name      string     `db:"name"`
-	Email     string     `db:"email"`
-	Gender    app.Gender `db:"gender"`
-	CreatedBy string     `db:"created_by"`
-	CreatedAt time.Time  `db:"created_at"`
-	UpdatedBy string     `db:"updated_by"`
-	UpdatedAt time.Time  `db:"updated_at"`
+	gorm.Model
+	ID        string     `gorm:"primaryKey"`
+	Status    app.Status `gorm:"type:status"`
+	Name      string
+	Email     string     `gorm:"unique"`
+	Gender    app.Gender `gorm:"type:gender"`
+	BirthDate time.Time
+	CreatedBy string
+	CreatedAt time.Time
+	UpdatedBy *string
+	UpdatedAt *time.Time
 }
 
-func (r *UserRepo) Create(user app.UserI) (app.UserI, error) {
-	return nil, nil
+func (r *UserRepo) Create(u app.UserI, createdBy string) (app.UserI, error) {
+	user := &UserModel{
+		ID:        u.GetID(),
+		Status:    u.GetStatus(),
+		Name:      u.GetName(),
+		Email:     u.GetEmail(),
+		Gender:    u.GetGender(),
+		BirthDate: u.GetBirthDate(),
+		CreatedBy: createdBy,
+		CreatedAt: time.Now(),
+	}
+
+	if res := r.conn.Create(&user); res.Error != nil {
+		return nil, res.Error
+	}
+
+	return &app.User{
+		ID:        user.ID,
+		Status:    user.Status,
+		Name:      user.Name,
+		Email:     user.Email,
+		Gender:    user.Gender,
+		BirthDate: user.BirthDate,
+	}, nil
 }
 
-func (r *UserRepo) Get(filters app.GetUserRepoFilters) (app.UserI, error) {
-	return nil, nil
+func (r *UserRepo) Get(f app.GetUserRepoFilters) (app.UserI, error) {
+	user := &UserModel{}
+
+	if res := r.conn.First(user, f); res.Error != nil {
+		return nil, res.Error
+	}
+
+	return &app.User{
+		ID:        user.ID,
+		Status:    user.Status,
+		Name:      user.Name,
+		Email:     user.Email,
+		Gender:    user.Gender,
+		BirthDate: user.BirthDate,
+	}, nil
 }
 
-func (r *UserRepo) List(filters app.ListUsersRepoFilters) ([]app.UserI, error) {
-	return nil, nil
+func (r *UserRepo) List(f app.ListUsersRepoFilters) ([]app.UserI, error) {
+	users := []UserModel{}
+
+	if res := r.conn.Find(&users); res.Error != nil {
+		return nil, res.Error
+	}
+
+	listUsers := make([]app.UserI, len(users))
+
+	for i, user := range users {
+		listUsers[i] = &app.User{
+			ID:        user.ID,
+			Status:    user.Status,
+			Name:      user.Name,
+			Email:     user.Email,
+			Gender:    user.Gender,
+			BirthDate: user.BirthDate,
+		}
+	}
+
+	return listUsers, nil
 }
 
-func (r *UserRepo) Update(user app.UserI) (app.UserI, error) {
-	return nil, nil
+func (r *UserRepo) Update(u app.UserI, updatedBy string) (app.UserI, error) {
+	now := time.Now()
+	user := &UserModel{
+		ID:        u.GetID(),
+		Status:    u.GetStatus(),
+		Name:      u.GetName(),
+		Email:     u.GetEmail(),
+		Gender:    u.GetGender(),
+		BirthDate: u.GetBirthDate(),
+		UpdatedBy: &updatedBy,
+		UpdatedAt: &now,
+	}
+
+	if res := r.conn.Updates(&user); res.Error != nil {
+		return nil, res.Error
+	}
+
+	return &app.User{
+		ID:        user.ID,
+		Status:    user.Status,
+		Name:      user.Name,
+		Email:     user.Email,
+		Gender:    user.Gender,
+		BirthDate: user.BirthDate,
+	}, nil
 }

@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/asaskevich/govalidator"
 	uuid "github.com/satori/go.uuid"
@@ -13,20 +14,22 @@ func init() {
 }
 
 type User struct {
-	ID     string `valid:"uuidv4"`
-	Status Status
-	Name   string
-	Email  string `valid:"email"`
-	Gender Gender
+	ID        string `valid:"uuidv4"`
+	Status    Status
+	Name      string
+	Email     string `valid:"email"`
+	Gender    Gender
+	BirthDate time.Time
 }
 
-func NewUser(name string, email string, gender Gender) (*User, error) {
+func NewUser(name string, email string, gender Gender, BirthDate time.Time) (*User, error) {
 	user := &User{
-		ID:     uuid.NewV4().String(),
-		Status: IN_ANALYSIS,
-		Name:   name,
-		Email:  email,
-		Gender: gender,
+		ID:        uuid.NewV4().String(),
+		Status:    IN_ANALYSIS,
+		Name:      name,
+		Email:     email,
+		Gender:    gender,
+		BirthDate: BirthDate,
 	}
 
 	if _, err := user.Validate(); err != nil {
@@ -40,6 +43,10 @@ func (u *User) Validate() (bool, error) {
 	_, err := govalidator.ValidateStruct(u)
 	if err != nil {
 		return false, err
+	}
+
+	if u.Name == "" {
+		return false, errors.New("o nome não pode ser vazio")
 	}
 
 	if u.Status != ENABLED && u.Status != DISABLED && u.Status != IN_ANALYSIS {
@@ -77,8 +84,9 @@ func (u *User) Disable() error {
 	return err
 }
 
-func (u *User) GetID() string     { return u.ID }
-func (u *User) GetStatus() Status { return u.Status }
-func (u *User) GetName() string   { return u.Name }
-func (u *User) GetEmail() string  { return u.Email }
-func (u *User) GetGender() Gender { return u.Gender }
+func (u *User) GetID() string           { return u.ID }
+func (u *User) GetStatus() Status       { return u.Status }
+func (u *User) GetName() string         { return u.Name }
+func (u *User) GetEmail() string        { return u.Email }
+func (u *User) GetGender() Gender       { return u.Gender }
+func (u *User) GetBirthDate() time.Time { return u.BirthDate }

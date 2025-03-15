@@ -1,5 +1,7 @@
 package app
 
+import "time"
+
 // USER
 
 type UserI interface {
@@ -8,6 +10,7 @@ type UserI interface {
 	Disable() error
 	GetID() string
 	GetStatus() Status
+	GetBirthDate() time.Time
 	GetName() string
 	GetEmail() string
 	GetGender() Gender
@@ -32,17 +35,18 @@ const (
 // SERVICE
 
 type UserServiceI interface {
-	Create(payload CreateUserServicePayload) (UserI, error)
-	Disable(id string) (UserI, error)
-	Enable(id string) (UserI, error)
+	Create(payload CreateUserServicePayload, createdBy string) (UserI, error)
+	Disable(id string, updatedBy string) (UserI, error)
+	Enable(id string, updatedBy string) (UserI, error)
 	Get(filters GetUserServiceFilters) (UserI, error)
 	List(filters ListUsersServiceFilters) ([]UserI, error)
 }
 
 type CreateUserServicePayload struct {
-	Name   string
-	Email  string
-	Gender Gender
+	Name      string
+	Email     string
+	Gender    Gender
+	BirthDate time.Time
 }
 
 type GetUserServiceFilters struct {
@@ -59,10 +63,10 @@ type ListUsersServiceFilters struct {
 // REPOSITORY
 
 type UserRepoI interface {
-	Create(user UserI) (UserI, error)
+	Create(user UserI, createdBy string) (UserI, error)
 	Get(filters GetUserRepoFilters) (UserI, error)
 	List(filters ListUsersRepoFilters) ([]UserI, error)
-	Update(user UserI) (UserI, error)
+	Update(user UserI, updatedBy string) (UserI, error)
 }
 
 type GetUserRepoFilters struct {

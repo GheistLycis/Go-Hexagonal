@@ -2,7 +2,7 @@ package main
 
 import (
 	"Go-Hexagonal/cmd/api"
-	"Go-Hexagonal/cmd/event"
+	db "Go-Hexagonal/infra/db"
 	"fmt"
 )
 
@@ -13,6 +13,6 @@ func main() {
 		}
 	}()
 
+	db.Init(true)
 	api.Init(8000)
-	event.Init()
 }
