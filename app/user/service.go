@@ -1,6 +1,5 @@
 package app
 
-
 type UserService struct {
 	repo UserRepoI
 }
@@ -9,91 +8,55 @@ func NewUserService(r UserRepoI) *UserService {
 	return &UserService{repo: r}
 }
 
-
-type GetUserRepoFilters struct {
-	ID *string
-	Email *string
-}
-
-type ListUsersRepoFilters struct {
-	Name *string
-	Status *string
-}
-
-type UserRepoI interface {
-	Create(user UserI) (UserI, error)
-	Get(filters GetUserRepoFilters) (UserI, error)
-	List(filters ListUsersRepoFilters) ([]UserI, error)
-	Update(user UserI) (UserI, error)
-}
-
-
-type CreateUserServicePayload struct {
-	Name string
-	Email string
-}
-
-type GetUserServiceFilters struct {
-	ID *string
-	Email *string
-}
-
-type ListUsersServiceFilters struct {
-	Name *string
-	Status *string
-}
-
-type UserServiceI interface {
-	Create(payload CreateUserServicePayload) (UserI, error)
-	Disable(id string) (UserI, error)
-	Enable(id string) (UserI, error)
-	Get(filters GetUserServiceFilters) (UserI, error)
-	List(filters ListUsersServiceFilters) ([]UserI, error)
-}
-
-func (s *UserService) Create(p CreateUserServicePayload) (User, error) {
-	user := NewUser()
-	user.Name = name
-	user.Price = price
-	_, err := user.IsValid()
+func (s *UserService) Create(p CreateUserServicePayload) (UserI, error) {
+	user, err := NewUser(p.Name, p.Email, p.Gender)
 	if err != nil {
-		return &User{}, err
+		return nil, err
 	}
-	result, err := s.Persistence.Save(user)
-	if err != nil {
-		return &User{}, err
+
+	if _, err := s.repo.Create(user); err != nil {
+		return nil, err
 	}
-	return result, nil
+
+	return user, nil
 }
 
-func (s *UserService) Disable(id string) (User, error) {
-	err := user.Disable()
+func (s *UserService) Disable(id string) (UserI, error) {
+	user, err := s.repo.Get(GetUserRepoFilters{ID: &id})
 	if err != nil {
-		return &User{}, err
+		return nil, err
 	}
-	result, err := s.Persistence.Save(user)
-	if err != nil {
-		return &User{}, err
+
+	if err := user.Disable(); err != nil {
+		return nil, err
 	}
-	return result, nil
+
+	if _, err := s.repo.Update(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
-func (s *UserService) Enable(id string) (User, error) {
-	err := user.Enable()
+func (s *UserService) Enable(id string) (UserI, error) {
+	user, err := s.repo.Get(GetUserRepoFilters{ID: &id})
 	if err != nil {
-		return &User{}, err
+		return nil, err
 	}
-	result, err := s.Persistence.Save(user)
-	if err != nil {
-		return &User{}, err
+
+	if err := user.Enable(); err != nil {
+		return nil, err
 	}
-	return result, nil
+
+	if _, err := s.repo.Update(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
-func (s *UserService) Get(f GetUserServiceFilters) (User, error) {
-	filters := GetUserRepoFilters{ID: &id}
-	user, err := s.repo.Get(filters)
-
+func (s *UserService) Get(f GetUserServiceFilters) (UserI, error) {
+	user, err := s.repo.Get(GetUserRepoFilters(f))
 	if err != nil {
 		return nil, err
 	}
@@ -101,13 +64,11 @@ func (s *UserService) Get(f GetUserServiceFilters) (User, error) {
 	return user, nil
 }
 
-func (s *UserService) List(f ListUsersServiceFilters) ([]User, error) {
-	filters := GetUserRepoFilters{ID: &id}
-	user, err := s.repo.Get(filters)
-
+func (s *UserService) List(f ListUsersServiceFilters) ([]UserI, error) {
+	users, err := s.repo.List(ListUsersRepoFilters(f))
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return users, nil
 }
