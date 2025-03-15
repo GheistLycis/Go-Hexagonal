@@ -16,6 +16,15 @@ type UserI interface {
 	GetGender() Gender
 }
 
+/*
+const (
+
+	ENABLED     Status = "ATIVO"
+	IN_ANALYSIS Status = "EM ANÁLISE"
+	DISABLED    Status = "INATIVO"
+
+)
+*/
 type Status string
 
 const (
@@ -24,6 +33,15 @@ const (
 	DISABLED    Status = "INATIVO"
 )
 
+/*
+const (
+
+	MALE   Gender = "MASCULINO"
+	FEMALE Gender = "FEMININO"
+	OTHER  Gender = "OUTRO"
+
+)
+*/
 type Gender string
 
 const (
@@ -43,10 +61,10 @@ type UserServiceI interface {
 }
 
 type CreateUserServicePayload struct {
-	Name      string
-	Email     string
-	Gender    Gender
-	BirthDate time.Time
+	Name      string    `json:"name" binding:"required"`
+	Email     string    `json:"email" binding:"required"`
+	Gender    Gender    `json:"gender" binding:"required"`
+	BirthDate time.Time `json:"birthDate" binding:"required"`
 }
 
 type GetUserServiceFilters struct {

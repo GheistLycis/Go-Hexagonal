@@ -8,16 +8,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func getById(c *gin.Context, s app.UserServiceI) {
-	id := c.Param("id")
+func create(c *gin.Context, s app.UserServiceI) {
+	payload := app.CreateUserServicePayload{}
+	createdBy := c.GetHeader("userEmail") // TODO: session service with auth (JWT)
 
-	user, err := s.Get(app.GetUserServiceFilters{ID: &id})
-	if err != nil {
-		c.JSON(http.StatusNotFound, err.Error())
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	res := getUserByIdRes{
+	user, err := s.Create(payload, createdBy)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+
+	res := createUserRes{
 		ID:        user.GetID(),
 		Status:    user.GetStatus(),
 		Name:      user.GetName(),
@@ -29,7 +35,7 @@ func getById(c *gin.Context, s app.UserServiceI) {
 	c.JSON(http.StatusOK, res)
 }
 
-type getUserByIdRes struct {
+type createUserRes struct {
 	ID        string     `json:"id" binding:"required"`
 	Status    app.Status `json:"status" binding:"required"`
 	Name      string     `json:"name" binding:"required"`
