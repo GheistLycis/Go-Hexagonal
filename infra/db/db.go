@@ -8,7 +8,7 @@ import (
 	user "Go-Hexagonal/infra/db/user"
 
 	"github.com/joho/godotenv"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -47,7 +47,7 @@ func getDSN() string {
 }
 
 func connect(dsn string) *gorm.DB {
-	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)

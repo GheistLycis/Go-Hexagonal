@@ -18,10 +18,10 @@ func NewUserRepo(c *gorm.DB) *UserRepo {
 type UserModel struct {
 	gorm.Model
 	ID        string     `gorm:"primaryKey"`
-	Status    app.Status `gorm:"type:status"`
+	Status    app.Status `gorm:"type:user_status"`
 	Name      string
 	Email     string     `gorm:"unique"`
-	Gender    app.Gender `gorm:"type:gender"`
+	Gender    app.Gender `gorm:"type:user_gender"`
 	BirthDate time.Time
 	CreatedBy string
 	CreatedAt time.Time
