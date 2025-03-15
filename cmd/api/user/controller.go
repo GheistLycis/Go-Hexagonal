@@ -15,6 +15,11 @@ func init() {
 	service = app.NewUserService(repo)
 }
 
+/*
+SetRouter maps all routes in User context to their handlers.
+
+-g: gin server
+*/
 func SetRouter(g *gin.Engine) {
 	g.GET("user/:id", handle(getById))
 }
