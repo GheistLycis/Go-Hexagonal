@@ -17,6 +17,12 @@ Init creates the server, set its routers and handlers and then runs it.
 -DB: the database connection
 */
 func Init(p int, DB *gorm.DB) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("[API] Recovered from panic -", r)
+		}
+	}()
+
 	server := gin.Default()
 
 	initRouters(server, DB)

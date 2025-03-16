@@ -11,7 +11,7 @@ type UserRepo struct {
 	conn *gorm.DB
 }
 
-func NewUserRepo(c *gorm.DB) *UserRepo {
+func NewUserRepo(c *gorm.DB) *UserRepo { // TODO: use generic interface
 	return &UserRepo{conn: c}
 }
 

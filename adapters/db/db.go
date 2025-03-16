@@ -13,19 +13,21 @@ import (
 )
 
 /*
-Init generates the DSN string from local .env, connects to the DB and returns the active connection.
+Init generates the DSN string from .env and connects to the database.
+
+Returns the active connection.
 
 -m: whether to auto-migrate every mapped model.
 */
 func Init(m bool) *gorm.DB {
 	dsn := getDSN()
-	DB := connect(dsn)
+	conn := connect(dsn)
 
 	if m {
-		migrate(DB)
+		migrate(conn)
 	}
 
-	return DB
+	return conn
 }
 
 func getDSN() string {

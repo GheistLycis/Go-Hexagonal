@@ -9,7 +9,7 @@ import (
 
 func enable(c *gin.Context, s app.UserServiceI) {
 	id := c.Param("id")
-	updatedBy := c.GetHeader("userEmail") // TODO: implement session service
+	updatedBy := c.GetHeader("userEmail")
 
 	if _, err := s.Enable(id, updatedBy); err != nil {
 		c.JSON(http.StatusConflict, err.Error())
