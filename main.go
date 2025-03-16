@@ -3,6 +3,7 @@ package main
 import (
 	db "Go-Hexagonal/adapters/db"
 	"Go-Hexagonal/cmd/api"
+	"Go-Hexagonal/cmd/tcp"
 	"fmt"
 )
 
@@ -13,6 +14,7 @@ func main() {
 		}
 	}()
 
-	db.Init(true)
-	api.Init(8000)
+	dbConn := db.Init(true)
+	api.Init(8000, dbConn)
+	tcp.Init(8080)
 }

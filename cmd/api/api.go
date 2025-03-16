@@ -7,27 +7,29 @@ import (
 	user_controller "Go-Hexagonal/cmd/api/user"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 /*
 Init creates the server, set its routers and handlers and then runs it.
 
--port: the server port.
+-p: the server port.
+-DB: the database connection
 */
-func Init(port int) {
+func Init(p int, DB *gorm.DB) {
 	server := gin.Default()
 
-	initRouters(server)
+	initRouters(server, DB)
 	initHandlers(server)
-	server.Run(fmt.Sprintf(":%d", port))
+	server.Run(fmt.Sprintf(":%d", p))
 }
 
-func initRouters(server *gin.Engine) {
-	user_controller.SetRouter(server)
+func initRouters(s *gin.Engine, DB *gorm.DB) {
+	user_controller.SetRouter(s, DB)
 }
 
-func initHandlers(server *gin.Engine) {
-	server.Use(handleErrors)
+func initHandlers(s *gin.Engine) {
+	s.Use(handleErrors)
 }
 
 func handleErrors(c *gin.Context) {

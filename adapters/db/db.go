@@ -12,21 +12,20 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
 /*
-Init generates the DSN string from local .env and connects to the DB.
+Init generates the DSN string from local .env, connects to the DB and returns the active connection.
 
--doMigration: whether to migrate every mapped model.
+-m: whether to auto-migrate every mapped model.
 */
-func Init(doMigration bool) {
+func Init(m bool) *gorm.DB {
 	dsn := getDSN()
+	DB := connect(dsn)
 
-	DB = connect(dsn)
-
-	if doMigration {
+	if m {
 		migrate(DB)
 	}
+
+	return DB
 }
 
 func getDSN() string {
@@ -59,9 +58,7 @@ func connect(dsn string) *gorm.DB {
 }
 
 func migrate(db *gorm.DB) {
-	err := db.AutoMigrate(&user.UserModel{})
-
-	if err != nil {
+	if err := db.AutoMigrate(&user.UserModel{}); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 }
