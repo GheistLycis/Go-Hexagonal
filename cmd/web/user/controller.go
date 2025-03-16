@@ -1,4 +1,4 @@
-package api
+package web
 
 import (
 	db_user "Go-Hexagonal/adapters/db/user"

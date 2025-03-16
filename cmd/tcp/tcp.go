@@ -40,13 +40,10 @@ func handleConnection(c net.Conn) {
 	for {
 		message, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Printf(`
-				Closing connection with %v. 
-				Error reading incoming stream - %v
-			`, c.RemoteAddr(), err)
+			fmt.Printf("Closing connection with %v.\nError reading incoming stream - %v", c.RemoteAddr(), err)
 			return
 		}
 
-		fmt.Print("Received: ", message)
+		fmt.Printf("[TCP] %v: %s", c.RemoteAddr(), message)
 	}
 }

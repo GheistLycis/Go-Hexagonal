@@ -1,10 +1,10 @@
-package api
+package web
 
 import (
 	"fmt"
 	"net/http"
 
-	user_controller "Go-Hexagonal/cmd/api/user"
+	web_user "Go-Hexagonal/cmd/web/user"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -31,7 +31,7 @@ func Init(p int, DB *gorm.DB) {
 }
 
 func initRouters(s *gin.Engine, DB *gorm.DB) {
-	user_controller.SetRouter(s, DB)
+	web_user.SetRouter(s, DB)
 }
 
 func initHandlers(s *gin.Engine) {

@@ -1,4 +1,4 @@
-package api
+package web
 
 import (
 	app "Go-Hexagonal/app/user"
@@ -8,22 +8,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func create(c *gin.Context, s app.UserServiceI) {
-	payload := app.CreateUserServicePayload{}
-	createdBy := c.GetHeader("userEmail")
+func getById(c *gin.Context, s app.UserServiceI) {
+	id := c.Param("id")
 
-	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.JSON(http.StatusBadRequest, err.Error())
-		return
-	}
-
-	user, err := s.Create(payload, createdBy)
+	user, err := s.Get(app.GetUserServiceFilters{ID: &id})
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		c.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 
-	res := createUserRes{
+	res := getUserByIdRes{
 		ID:        user.GetID(),
 		Status:    user.GetStatus(),
 		Name:      user.GetName(),
@@ -35,7 +29,7 @@ func create(c *gin.Context, s app.UserServiceI) {
 	c.JSON(http.StatusOK, res)
 }
 
-type createUserRes struct {
+type getUserByIdRes struct {
 	ID        string     `json:"id" binding:"required"`
 	Status    app.Status `json:"status" binding:"required"`
 	Name      string     `json:"name" binding:"required"`
