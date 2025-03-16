@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	user "Go-Hexagonal/infra/db/user"
+	user "Go-Hexagonal/adapters/db/user"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"

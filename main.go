@@ -1,8 +1,8 @@
 package main
 
 import (
+	db "Go-Hexagonal/adapters/db"
 	"Go-Hexagonal/cmd/api"
-	db "Go-Hexagonal/infra/db"
 	"fmt"
 )
 

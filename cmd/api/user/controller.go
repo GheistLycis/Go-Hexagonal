@@ -1,9 +1,9 @@
 package api
 
 import (
+	db "Go-Hexagonal/adapters/db"
+	db_user "Go-Hexagonal/adapters/db/user"
 	app "Go-Hexagonal/app/user"
-	db "Go-Hexagonal/infra/db"
-	db_user "Go-Hexagonal/infra/db/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +14,7 @@ SetRouter maps all routes in User context to their handlers.
 -g: gin server
 */
 func SetRouter(g *gin.Engine) {
-	repo := db_user.NewUserRepo(db.DB) // TODO: create deps container
+	repo := db_user.NewUserRepo(db.DB) // TODO: create deps container (or not?)
 	service := app.NewUserService(repo)
 
 	g.GET("user/:id", handle(getById, service))
