@@ -10,7 +10,7 @@ import (
 
 func create(c *gin.Context, s app.UserServiceI) {
 	payload := app.CreateUserServicePayload{}
-	createdBy := c.GetHeader("userEmail") // TODO: session service with auth (JWT)
+	createdBy := c.GetHeader("userEmail") // TODO: implement session service
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())

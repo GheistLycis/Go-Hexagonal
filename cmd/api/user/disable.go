@@ -9,7 +9,7 @@ import (
 
 func disable(c *gin.Context, s app.UserServiceI) {
 	id := c.Param("id")
-	updatedBy := c.GetHeader("userEmail") // TODO: session service with auth (JWT)
+	updatedBy := c.GetHeader("userEmail") // TODO: implement session service
 
 	if _, err := s.Disable(id, updatedBy); err != nil {
 		c.JSON(http.StatusConflict, err.Error())

@@ -14,7 +14,7 @@ SetRouter maps all routes in User context to their handlers.
 -g: gin server
 */
 func SetRouter(g *gin.Engine) {
-	repo := db_user.NewUserRepo(db.DB) // TODO: create deps container (or not?)
+	repo := db_user.NewUserRepo(db.DB) // TODO: implement singleton deps container (or not?)
 	service := app.NewUserService(repo)
 
 	g.GET("user/:id", handle(getById, service))
@@ -24,7 +24,7 @@ func SetRouter(g *gin.Engine) {
 	g.POST("user/:id/disable", handle(disable, service))
 }
 
-func handle(m method, s app.UserServiceI) gin.HandlerFunc {
+func handle(m method, s app.UserServiceI) gin.HandlerFunc { // TODO: implement auth service
 	return func(c *gin.Context) {
 		m(c, s)
 	}
