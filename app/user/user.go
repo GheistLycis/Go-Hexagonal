@@ -14,12 +14,12 @@ func init() {
 }
 
 type User struct {
-	ID        string `valid:"uuidv4"`
-	Status    Status
-	Name      string
-	Email     string `valid:"email"`
-	Gender    Gender
-	BirthDate time.Time
+	ID        string    `valid:"uuidv4"`
+	Status    Status    `valid:"-"`
+	Name      string    `valid:"-"`
+	Email     string    `valid:"email"`
+	Gender    Gender    `valid:"-"`
+	BirthDate time.Time `valid:"-"`
 }
 
 func NewUser(name string, email string, gender Gender, BirthDate time.Time) (*User, error) {
