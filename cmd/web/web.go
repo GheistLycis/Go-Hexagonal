@@ -2,7 +2,10 @@ package web
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	web_user "Go-Hexagonal/cmd/web/user"
 
@@ -13,21 +16,24 @@ import (
 /*
 Init creates the server, set its routers and handlers and then runs it.
 
--p: the server port.
 -DB: the database connection
 */
-func Init(p int, DB *gorm.DB) {
+func Init(DB *gorm.DB) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("[API] Recovered from panic -", r)
+			fmt.Println("[WEB] Recovered from panic -", r)
 		}
 	}()
 
 	server := gin.Default()
+	serverPort, err := strconv.ParseInt(os.Getenv("WEB_PORT"), 10, 64)
+	if err != nil {
+		log.Fatalf("[WEB] Failed to parse ENV variable WEB_PORT - %v", err)
+	}
 
 	initRouters(server, DB)
 	initHandlers(server)
-	server.Run(fmt.Sprintf(":%d", p))
+	server.Run(fmt.Sprintf(":%d", serverPort))
 }
 
 func initRouters(s *gin.Engine, DB *gorm.DB) {

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	user "Go-Hexagonal/adapters/db/user"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -19,11 +19,13 @@ Returns the active connection.
 
 -m: whether to auto-migrate every mapped model.
 */
-func Init(m bool) *gorm.DB {
+func Init() *gorm.DB {
 	dsn := getDSN()
 	conn := connect(dsn)
 
-	if m {
+	if autoMigrateDB, err := strconv.ParseBool(os.Getenv("DB_AUTO_MIGRATE")); err != nil {
+		log.Fatal("[DB] Error while parsing ENV variable DB_AUTO_MIGRATE -", err)
+	} else if autoMigrateDB {
 		migrate(conn)
 	}
 
@@ -31,12 +33,6 @@ func Init(m bool) *gorm.DB {
 }
 
 func getDSN() string {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-
-		return ""
-	}
-
 	return fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		os.Getenv("DB_HOST"),
@@ -51,7 +47,7 @@ func connect(dsn string) *gorm.DB {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatalf("[DB] Failed to connect - %v", err)
 
 		return nil
 	}
@@ -61,6 +57,8 @@ func connect(dsn string) *gorm.DB {
 
 func migrate(db *gorm.DB) {
 	if err := db.AutoMigrate(&user.UserModel{}); err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
+		log.Fatalf("[DB] Failed to migrate - %v", err)
 	}
+
+	log.Print("[DB] Automigration done successfully")
 }

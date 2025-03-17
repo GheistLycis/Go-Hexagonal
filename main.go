@@ -4,11 +4,18 @@ import (
 	db "Go-Hexagonal/adapters/db"
 	"Go-Hexagonal/cmd/tcp"
 	"Go-Hexagonal/cmd/web"
+	"log"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	go web.Init(8000, db.Init(true))
-	go tcp.Init(8080)
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file - %v", err)
+	}
+
+	go web.Init(db.Init())
+	go tcp.Init()
 
 	select {}
 }
