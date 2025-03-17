@@ -2,26 +2,27 @@ package db
 
 import (
 	app "Go-Hexagonal/app/user"
+	app_ports "Go-Hexagonal/app/user/ports"
 	"time"
 
 	"gorm.io/gorm"
 )
 
-type UserRepo struct {
+type UserRepository struct {
 	conn *gorm.DB
 }
 
-func NewUserRepo(c *gorm.DB) *UserRepo { // TODO: use generic interface
-	return &UserRepo{conn: c}
+func NewUserRepo(c *gorm.DB) *UserRepository { // TODO: use generic interface
+	return &UserRepository{conn: c}
 }
 
 type UserModel struct {
 	gorm.Model
-	ID        string     `gorm:"primaryKey"`
-	Status    app.Status `gorm:"type:user_status"`
+	ID        string           `gorm:"primaryKey"`
+	Status    app_ports.Status `gorm:"type:user_status"`
 	Name      string
-	Email     string     `gorm:"unique"`
-	Gender    app.Gender `gorm:"type:user_gender"`
+	Email     string           `gorm:"unique"`
+	Gender    app_ports.Gender `gorm:"type:user_gender"`
 	BirthDate time.Time
 	CreatedBy string
 	CreatedAt time.Time
@@ -29,7 +30,7 @@ type UserModel struct {
 	UpdatedAt *time.Time
 }
 
-func (r *UserRepo) Create(u app.UserI, createdBy string) (app.UserI, error) {
+func (r *UserRepository) Create(u app_ports.UserPort, createdBy string) (app_ports.UserPort, error) {
 	user := &UserModel{
 		ID:        u.GetID(),
 		Status:    u.GetStatus(),
@@ -55,7 +56,7 @@ func (r *UserRepo) Create(u app.UserI, createdBy string) (app.UserI, error) {
 	}, nil
 }
 
-func (r *UserRepo) Get(f app.GetUserRepoFilters) (app.UserI, error) {
+func (r *UserRepository) Get(f app_ports.GetUserRepoFiltersDTO) (app_ports.UserPort, error) {
 	user := &UserModel{}
 
 	if res := r.conn.First(user, f); res.Error != nil {
@@ -72,14 +73,14 @@ func (r *UserRepo) Get(f app.GetUserRepoFilters) (app.UserI, error) {
 	}, nil
 }
 
-func (r *UserRepo) List(f app.ListUsersRepoFilters) ([]app.UserI, error) {
+func (r *UserRepository) List(f app_ports.ListUsersRepoFiltersDTO) ([]app_ports.UserPort, error) {
 	users := []UserModel{}
 
 	if res := r.conn.Find(&users); res.Error != nil {
 		return nil, res.Error
 	}
 
-	listUsers := make([]app.UserI, len(users))
+	listUsers := make([]app_ports.UserPort, len(users))
 
 	for i, user := range users {
 		listUsers[i] = &app.User{
@@ -95,7 +96,7 @@ func (r *UserRepo) List(f app.ListUsersRepoFilters) ([]app.UserI, error) {
 	return listUsers, nil
 }
 
-func (r *UserRepo) Update(u app.UserI, updatedBy string) (app.UserI, error) {
+func (r *UserRepository) Update(u app_ports.UserPort, updatedBy string) (app_ports.UserPort, error) {
 	now := time.Now()
 	user := &UserModel{
 		ID:        u.GetID(),

@@ -1,13 +1,13 @@
 package web
 
 import (
-	app "Go-Hexagonal/app/user"
+	app_ports "Go-Hexagonal/app/user/ports"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func disable(c *gin.Context, s app.UserServiceI) {
+func disable(c *gin.Context, s app_ports.UserServicePort) {
 	id := c.Param("id")
 	updatedBy := c.GetHeader("userEmail")
 

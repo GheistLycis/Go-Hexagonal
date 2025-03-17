@@ -1,25 +1,25 @@
 package web
 
 import (
-	app "Go-Hexagonal/app/user"
+	app_ports "Go-Hexagonal/app/user/ports"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-func list(c *gin.Context, s app.UserServiceI) {
-	filters := app.ListUsersServiceFilters{}
+func list(c *gin.Context, s app_ports.UserServicePort) {
+	filters := app_ports.ListUsersServiceFiltersDTO{}
 
 	if nameQuery, nameExists := c.GetQuery("name"); nameExists {
 		filters.Name = &nameQuery
 	}
 	if statusQuery, statusExists := c.GetQuery("status"); statusExists {
-		status := app.Status(statusQuery)
+		status := app_ports.Status(statusQuery)
 		filters.Status = &status
 	}
 	if genderQuery, genderExists := c.GetQuery("gender"); genderExists {
-		gender := app.Gender(genderQuery)
+		gender := app_ports.Gender(genderQuery)
 		filters.Gender = &gender
 	}
 
@@ -46,10 +46,10 @@ func list(c *gin.Context, s app.UserServiceI) {
 }
 
 type listUserRes struct {
-	ID        string     `json:"id" binding:"required"`
-	Status    app.Status `json:"status" binding:"required"`
-	Name      string     `json:"name" binding:"required"`
-	Email     string     `json:"email" binding:"required"`
-	Gender    app.Gender `json:"gender" binding:"required"`
-	BirthDate time.Time  `json:"birthDate" binding:"required"`
+	ID        string           `json:"id" binding:"required"`
+	Status    app_ports.Status `json:"status" binding:"required"`
+	Name      string           `json:"name" binding:"required"`
+	Email     string           `json:"email" binding:"required"`
+	Gender    app_ports.Gender `json:"gender" binding:"required"`
+	BirthDate time.Time        `json:"birthDate" binding:"required"`
 }

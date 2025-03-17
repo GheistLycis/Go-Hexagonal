@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	ports "Go-Hexagonal/app/user/ports"
+
 	"github.com/asaskevich/govalidator"
 	uuid "github.com/satori/go.uuid"
 )
@@ -14,18 +16,18 @@ func init() {
 }
 
 type User struct {
-	ID        string    `valid:"uuidv4"`
-	Status    Status    `valid:"-"`
-	Name      string    `valid:"-"`
-	Email     string    `valid:"email"`
-	Gender    Gender    `valid:"-"`
-	BirthDate time.Time `valid:"-"`
+	ID        string       `valid:"uuidv4"`
+	Status    ports.Status `valid:"-"`
+	Name      string       `valid:"-"`
+	Email     string       `valid:"email"`
+	Gender    ports.Gender `valid:"-"`
+	BirthDate time.Time    `valid:"-"`
 }
 
-func NewUser(name string, email string, gender Gender, BirthDate time.Time) (*User, error) {
+func NewUser(name string, email string, gender ports.Gender, BirthDate time.Time) (*User, error) {
 	user := &User{
 		ID:        uuid.NewV4().String(),
-		Status:    IN_ANALYSIS,
+		Status:    ports.IN_ANALYSIS,
 		Name:      name,
 		Email:     email,
 		Gender:    gender,
@@ -49,11 +51,11 @@ func (u *User) Validate() (bool, error) {
 		return false, errors.New("o nome não pode ser vazio")
 	}
 
-	if u.Status != ENABLED && u.Status != DISABLED && u.Status != IN_ANALYSIS {
+	if u.Status != ports.ENABLED && u.Status != ports.DISABLED && u.Status != ports.IN_ANALYSIS {
 		return false, fmt.Errorf("status inválido: %s", u.Status)
 	}
 
-	if u.Gender != MALE && u.Gender != FEMALE && u.Gender != OTHER {
+	if u.Gender != ports.MALE && u.Gender != ports.FEMALE && u.Gender != ports.OTHER {
 		return false, fmt.Errorf("gênero inválido: %s", u.Gender)
 	}
 
@@ -61,11 +63,11 @@ func (u *User) Validate() (bool, error) {
 }
 
 func (u *User) Enable() error {
-	if u.Status == ENABLED {
+	if u.Status == ports.ENABLED {
 		return errors.New("o usuário já está ativo")
 	}
 
-	u.Status = ENABLED
+	u.Status = ports.ENABLED
 
 	_, err := u.Validate()
 
@@ -73,11 +75,11 @@ func (u *User) Enable() error {
 }
 
 func (u *User) Disable() error {
-	if u.Status == DISABLED {
+	if u.Status == ports.DISABLED {
 		return errors.New("o usuário já está inativo")
 	}
 
-	u.Status = DISABLED
+	u.Status = ports.DISABLED
 
 	_, err := u.Validate()
 
@@ -85,8 +87,8 @@ func (u *User) Disable() error {
 }
 
 func (u *User) GetID() string           { return u.ID }
-func (u *User) GetStatus() Status       { return u.Status }
+func (u *User) GetStatus() ports.Status { return u.Status }
 func (u *User) GetName() string         { return u.Name }
 func (u *User) GetEmail() string        { return u.Email }
-func (u *User) GetGender() Gender       { return u.Gender }
+func (u *User) GetGender() ports.Gender { return u.Gender }
 func (u *User) GetBirthDate() time.Time { return u.BirthDate }

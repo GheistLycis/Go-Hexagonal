@@ -1,14 +1,16 @@
 package app
 
+import ports "Go-Hexagonal/app/user/ports"
+
 type UserService struct {
-	repo UserRepoI
+	repo ports.UserRepoPort
 }
 
-func NewUserService(r UserRepoI) *UserService {
+func NewUserService(r ports.UserRepoPort) *UserService {
 	return &UserService{repo: r}
 }
 
-func (s *UserService) Create(p CreateUserServicePayload, createdBy string) (UserI, error) {
+func (s *UserService) Create(p ports.CreateUserServiceDTO, createdBy string) (ports.UserPort, error) {
 	user, err := NewUser(p.Name, p.Email, p.Gender, p.BirthDate)
 	if err != nil {
 		return nil, err
@@ -21,8 +23,8 @@ func (s *UserService) Create(p CreateUserServicePayload, createdBy string) (User
 	return user, nil
 }
 
-func (s *UserService) Disable(id string, updatedBy string) (UserI, error) {
-	user, err := s.repo.Get(GetUserRepoFilters{ID: &id})
+func (s *UserService) Disable(id string, updatedBy string) (ports.UserPort, error) {
+	user, err := s.repo.Get(ports.GetUserRepoFiltersDTO{ID: &id})
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +40,8 @@ func (s *UserService) Disable(id string, updatedBy string) (UserI, error) {
 	return user, nil
 }
 
-func (s *UserService) Enable(id string, updatedBy string) (UserI, error) {
-	user, err := s.repo.Get(GetUserRepoFilters{ID: &id})
+func (s *UserService) Enable(id string, updatedBy string) (ports.UserPort, error) {
+	user, err := s.repo.Get(ports.GetUserRepoFiltersDTO{ID: &id})
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +57,8 @@ func (s *UserService) Enable(id string, updatedBy string) (UserI, error) {
 	return user, nil
 }
 
-func (s *UserService) Get(f GetUserServiceFilters) (UserI, error) {
-	user, err := s.repo.Get(GetUserRepoFilters(f))
+func (s *UserService) Get(f ports.GetUserServiceFiltersDTO) (ports.UserPort, error) {
+	user, err := s.repo.Get(ports.GetUserRepoFiltersDTO(f))
 	if err != nil {
 		return nil, err
 	}
@@ -64,8 +66,8 @@ func (s *UserService) Get(f GetUserServiceFilters) (UserI, error) {
 	return user, nil
 }
 
-func (s *UserService) List(f ListUsersServiceFilters) ([]UserI, error) {
-	users, err := s.repo.List(ListUsersRepoFilters(f))
+func (s *UserService) List(f ports.ListUsersServiceFiltersDTO) ([]ports.UserPort, error) {
+	users, err := s.repo.List(ports.ListUsersRepoFiltersDTO(f))
 	if err != nil {
 		return nil, err
 	}
