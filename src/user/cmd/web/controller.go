@@ -1,9 +1,9 @@
-package web
+package user
 
 import (
-	db "Go-Hexagonal/adapters/db/user"
-	app "Go-Hexagonal/app/user"
-	app_ports "Go-Hexagonal/app/user/ports"
+	app "Go-Hexagonal/src/user/app"
+	domain "Go-Hexagonal/src/user/domain"
+	infra "Go-Hexagonal/src/user/infra"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -16,7 +16,7 @@ SetRouter maps all routes in User context to their handlers.
 -DB: the database active connection
 */
 func SetRouter(g *gin.Engine, DB *gorm.DB) {
-	repo := db.NewUserRepo(DB) // TODO: implement singleton deps container (or not?)
+	repo := infra.NewUserRepo(DB) // TODO: implement singleton deps container (or not?)
 	service := app.NewUserService(repo)
 
 	g.GET("user/:id", handle(getById, service))
@@ -26,10 +26,10 @@ func SetRouter(g *gin.Engine, DB *gorm.DB) {
 	g.POST("user/:id/disable", handle(disable, service))
 }
 
-func handle(m method, s app_ports.UserServicePort) gin.HandlerFunc { // TODO: implement auth service
+func handle(m method, s domain.UserServicePort) gin.HandlerFunc { // TODO: implement auth service
 	return func(c *gin.Context) {
 		m(c, s)
 	}
 }
 
-type method func(c *gin.Context, s app_ports.UserServicePort)
+type method func(c *gin.Context, s domain.UserServicePort)

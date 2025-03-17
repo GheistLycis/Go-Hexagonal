@@ -1,4 +1,4 @@
-package app
+package user
 
 type UserRepoPort interface {
 	Create(user UserPort, createdBy string) (UserPort, error)

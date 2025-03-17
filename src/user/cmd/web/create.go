@@ -1,15 +1,15 @@
-package web
+package user
 
 import (
-	app_ports "Go-Hexagonal/app/user/ports"
+	domain "Go-Hexagonal/src/user/domain"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-func create(c *gin.Context, s app_ports.UserServicePort) {
-	payload := app_ports.CreateUserServiceDTO{}
+func create(c *gin.Context, s domain.UserServicePort) {
+	payload := domain.CreateUserServiceDTO{}
 	createdBy := c.GetHeader("userEmail")
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
@@ -36,10 +36,10 @@ func create(c *gin.Context, s app_ports.UserServicePort) {
 }
 
 type createUserRes struct {
-	ID        string           `json:"id" binding:"required"`
-	Status    app_ports.Status `json:"status" binding:"required"`
-	Name      string           `json:"name" binding:"required"`
-	Email     string           `json:"email" binding:"required"`
-	Gender    app_ports.Gender `json:"gender" binding:"required"`
-	BirthDate time.Time        `json:"birthDate" binding:"required"`
+	ID        string        `json:"id" binding:"required"`
+	Status    domain.Status `json:"status" binding:"required"`
+	Name      string        `json:"name" binding:"required"`
+	Email     string        `json:"email" binding:"required"`
+	Gender    domain.Gender `json:"gender" binding:"required"`
+	BirthDate time.Time     `json:"birthDate" binding:"required"`
 }

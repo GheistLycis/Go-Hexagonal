@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	user "Go-Hexagonal/adapters/db/user"
+	user "Go-Hexagonal/src/user/infra"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

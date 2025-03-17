@@ -1,13 +1,13 @@
-package web
+package user
 
 import (
-	app_ports "Go-Hexagonal/app/user/ports"
+	domain "Go-Hexagonal/src/user/domain"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func enable(c *gin.Context, s app_ports.UserServicePort) {
+func enable(c *gin.Context, s domain.UserServicePort) {
 	id := c.Param("id")
 	updatedBy := c.GetHeader("userEmail")
 

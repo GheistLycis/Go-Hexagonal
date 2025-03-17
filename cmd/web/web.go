@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	web_user "Go-Hexagonal/cmd/web/user"
+	user "Go-Hexagonal/src/user/cmd/web"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -37,7 +37,7 @@ func Init(DB *gorm.DB) {
 }
 
 func initRouters(s *gin.Engine, DB *gorm.DB) {
-	web_user.SetRouter(s, DB)
+	user.SetRouter(s, DB)
 }
 
 func initHandlers(s *gin.Engine) {

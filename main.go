@@ -1,9 +1,9 @@
 package main
 
 import (
-	db "Go-Hexagonal/adapters/db"
-	"Go-Hexagonal/cmd/tcp"
-	"Go-Hexagonal/cmd/web"
+	tcp "Go-Hexagonal/cmd/tcp"
+	web "Go-Hexagonal/cmd/web"
+	db "Go-Hexagonal/infra/db"
 	"log"
 
 	"github.com/joho/godotenv"

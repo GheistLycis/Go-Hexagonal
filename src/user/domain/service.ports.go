@@ -1,8 +1,6 @@
-package app
+package user
 
-import (
-	"time"
-)
+import "time"
 
 type UserServicePort interface {
 	Create(payload CreateUserServiceDTO, createdBy string) (UserPort, error)
