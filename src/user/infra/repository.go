@@ -11,8 +11,7 @@ type UserRepository struct {
 	conn *gorm.DB
 }
 
-// TODO: use generic interface for DB adapter
-func NewUserRepo(c *gorm.DB) domain.UserRepoPort {
+func NewUserRepo(c *gorm.DB) domain.UserRepoPort { // TODO: use generic interface for DB adapter
 	return &UserRepository{conn: c}
 }
 
