@@ -22,19 +22,24 @@ func HandleServer(l net.Listener) {
 		conn, err := l.Accept()
 		if err != nil {
 			fmt.Println("Connection error:", err)
+			return
 		}
 
+		ip := strings.Split(conn.RemoteAddr().String(), ":")[0]
+
 		if connectionIsAllowed(conn) {
+			fmt.Printf("\nStablished connection with %s", ip)
 			go handleConnection(conn)
 		} else {
+			fmt.Printf("\nDenied connection with %s", ip)
 			conn.Close()
 		}
 	}
 }
 
 func connectionIsAllowed(c net.Conn) bool {
-	ip := c.RemoteAddr().String()
-	ipsWhitelist := strings.Split(os.Getenv("TCP_IP_WHITELIST"), ",")
+	ip := strings.Split(c.RemoteAddr().String(), ":")[0]
+	ipsWhitelist := strings.Split(os.Getenv("FT_IP_WHITELIST"), ",")
 
 	return slices.Contains(ipsWhitelist, ip)
 }
@@ -42,41 +47,44 @@ func connectionIsAllowed(c net.Conn) bool {
 func handleConnection(c net.Conn) {
 	defer closeConnection(c)
 
-	addr := c.RemoteAddr().String()
+	ip := strings.Split(c.RemoteAddr().String(), ":")[0]
+
 	dumpPath, err := getDumpPath()
 	if err != nil {
-		fmt.Printf("(%s) Error getting dump path: %v", addr, err)
+		fmt.Printf("\n(%s) Error getting dump path: %v", ip, err)
 		return
 	}
 
 	for {
 		fileName, err := getFileName(c)
 		if err != nil {
-			fmt.Printf("(%s) Error reading file name: %v", addr, err)
+			fmt.Printf("\n(%s) Error reading file name: %v", ip, err)
 			return
 		}
 
-		fmt.Printf("(%s) Receing content from...", addr)
+		fmt.Printf("\n(%s) Receiving content from...", ip)
 
 		outFile, err := os.Create(dumpPath + fileName)
 		if err != nil {
-			fmt.Printf("(%s) Error generating destiny file: %v", addr, err)
-			continue
+			fmt.Printf("\n(%s) Error generating destiny file: %v", ip, err)
+			return
 		}
 
 		if _, err = io.Copy(outFile, c); err != nil {
 			outFile.Close()
-			fmt.Printf("(%s) Error copying from connection stream: %v", addr, err)
-			continue
+			fmt.Printf("\n(%s) Error copying from connection stream: %v", ip, err)
+			return
 		}
 
 		outFile.Close()
-		fmt.Printf("(%s) Received content sucessfully!", addr)
+		fmt.Printf("\n(%s) Received content sucessfully!", ip)
 	}
 }
 
 func closeConnection(c net.Conn) {
-	fmt.Printf("(%s) Closing connection.", c.RemoteAddr().String())
+	ip := strings.Split(c.RemoteAddr().String(), ":")[0]
+
+	fmt.Printf("\nClosing connection with %s", ip)
 	c.Close()
 }
 
@@ -88,7 +96,7 @@ func getDumpPath() (string, error) {
 	}
 
 	currDir := strings.Split(workDir, pkgName)[0]
-	dumpDir := os.Getenv("TCP_DUMP_DIR")
+	dumpDir := os.Getenv("FT_DUMP_DIR")
 	dumpPath := currDir + pkgName + separator + dumpDir + separator
 
 	return dumpPath, nil
