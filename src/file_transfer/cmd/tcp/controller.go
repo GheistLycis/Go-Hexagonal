@@ -27,9 +27,9 @@ func HandleServer(l net.Listener) {
 
 		ip := strings.Split(conn.RemoteAddr().String(), ":")[0]
 
-		if connectionIsAllowed(conn) {
+		if connectionIsAllowed(conn, ip) {
 			fmt.Printf("\nStablished connection with %s", ip)
-			go handleConnection(conn)
+			go handleConnection(conn, ip)
 		} else {
 			fmt.Printf("\nDenied connection with %s", ip)
 			conn.Close()
@@ -37,17 +37,14 @@ func HandleServer(l net.Listener) {
 	}
 }
 
-func connectionIsAllowed(c net.Conn) bool {
-	ip := strings.Split(c.RemoteAddr().String(), ":")[0]
+func connectionIsAllowed(c net.Conn, ip string) bool {
 	ipsWhitelist := strings.Split(os.Getenv("FT_IP_WHITELIST"), ",")
 
 	return slices.Contains(ipsWhitelist, ip)
 }
 
-func handleConnection(c net.Conn) {
-	defer closeConnection(c)
-
-	ip := strings.Split(c.RemoteAddr().String(), ":")[0]
+func handleConnection(c net.Conn, ip string) {
+	defer closeConnection(c, ip)
 
 	dumpPath, err := getDumpPath()
 	if err != nil {
@@ -81,9 +78,7 @@ func handleConnection(c net.Conn) {
 	}
 }
 
-func closeConnection(c net.Conn) {
-	ip := strings.Split(c.RemoteAddr().String(), ":")[0]
-
+func closeConnection(c net.Conn, ip string) {
 	fmt.Printf("\nClosing connection with %s", ip)
 	c.Close()
 }
