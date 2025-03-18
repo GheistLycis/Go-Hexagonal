@@ -8,6 +8,7 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"time"
 )
 
 /*
@@ -44,43 +45,35 @@ func connectionIsAllowed(ip string) bool {
 func handleConnection(c net.Conn, ip string) {
 	defer closeConnection(c, ip)
 
-	dumpPath, err := getDumpPath()
+	dumpPath, err := getDumpPath(ip)
 	if err != nil {
 		fmt.Printf("\n(%s) Error getting dump path: %v", ip, err)
 		return
 	}
 
-	for {
-		fileName, err := getFileName(c)
-		if err != nil {
-			fmt.Printf("\n(%s) Error reading file name: %v", ip, err)
-			return
-		}
+	var buffer bytes.Buffer
 
-		var buf bytes.Buffer
-		bytes, err := io.Copy(&buf, c)
-		if err != nil {
-			fmt.Printf("\n(%s) Error copying from connection stream: %v", ip, err)
-			return
-		}
-
+	if bytes, err := io.Copy(&buffer, c); err != nil {
+		fmt.Printf("\n(%s) Error copying from connection stream: %v", ip, err)
+		return
+	} else {
 		fmt.Printf("\n(%s) Content received (%.2f mB). Working on it...", ip, float64(bytes)/(1024*1024))
-
-		outFile, err := os.Create(dumpPath + fileName)
-		if err != nil {
-			fmt.Printf("\n(%s) Error generating destiny file: %v", ip, err)
-			return
-		}
-
-		if _, err := io.Copy(outFile, &buf); err != nil {
-			outFile.Close()
-			fmt.Printf("\n(%s) Error copying from connection stream: %v", ip, err)
-			return
-		}
-
-		outFile.Close()
-		fmt.Printf("\n(%s) Content saved sucessfully!", ip)
 	}
+
+	outFile, err := os.Create(dumpPath + time.Now().Format("2006-01-02"))
+	if err != nil {
+		fmt.Printf("\n(%s) Error generating destiny file: %v", ip, err)
+		return
+	}
+
+	defer outFile.Close()
+
+	if _, err := io.Copy(outFile, &buffer); err != nil {
+		fmt.Printf("\n(%s) Error saving content: %v", ip, err)
+		return
+	}
+
+	fmt.Printf("\n(%s) Content saved sucessfully!", ip)
 }
 
 func closeConnection(c net.Conn, ip string) {
@@ -88,23 +81,19 @@ func closeConnection(c net.Conn, ip string) {
 	c.Close()
 }
 
-func getDumpPath() (string, error) {
-	separator := string(os.PathSeparator)
+func getDumpPath(f string) (string, error) {
+	sep := string(os.PathSeparator)
 	workDir, err := os.Getwd()
 	if err != nil {
 		return "", err
 	}
 
 	dumpDir := os.Getenv("FT_DUMP_DIR")
-	dumpPath := workDir + separator + dumpDir + separator
+	dumpPath := workDir + sep + dumpDir + sep + f + sep
 
 	if err := os.MkdirAll(dumpPath, os.ModePerm); err != nil {
 		return "", err
 	}
 
 	return dumpPath, nil
-}
-
-func getFileName(c net.Conn) (string, error) { // TODO: get actual file name from received stream
-	return "file.txt", nil
 }
