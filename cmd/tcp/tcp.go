@@ -40,9 +40,9 @@ func Init() {
 func handleConnection(c net.Conn) {
 	defer c.Close()
 
-	reader := bufio.NewReader(c)
+	receiver := bufio.NewReader(c)
 	for {
-		message, err := reader.ReadString('\n')
+		message, err := receiver.ReadString('\n')
 		if err != nil {
 			fmt.Printf("[TCP] Closing connection with %v.\nError reading incoming stream - %v", c.RemoteAddr(), err)
 			return

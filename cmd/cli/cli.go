@@ -1,7 +1,7 @@
 package cli
 
 /*
-Init creates starts CLI program.
+Init starts CLI program.
 */
 func Init() {
 
