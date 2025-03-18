@@ -11,12 +11,13 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var entry = "web"
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file - %v", err)
 	}
 
-	entry := "web"
 	if args := os.Args; len(args) >= 2 {
 		entry = args[1]
 	}
