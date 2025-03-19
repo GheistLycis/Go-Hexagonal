@@ -8,7 +8,7 @@ Go-based implementation of the Hexagonal Architecture (Ports and Adapters), feat
 -   Database handling with GORM and PostgreSQL
 -   TCP file transfer service
 
-## Installation
+## Installation 🔧
 
 ### Prerequisites
 
@@ -23,9 +23,9 @@ cd Go-Hexagonal
 go mod tidy
 ```
 
--   Set a .env according to the `env.example` in the root.
+Set a `.env` according to the `env.example` in the root.
 
-## Usage
+## Usage 💻
 
 ### Web Server
 
@@ -37,7 +37,7 @@ Start the HTTP server with:
 ./scripts/run.sh
 ```
 
-Access it at `http://localhost:8080`
+Access it at `http://localhost:<WEB_PORT>`
 
 ### TCP Server
 
