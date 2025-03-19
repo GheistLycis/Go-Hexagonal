@@ -1,6 +1,7 @@
 package user
 
 import (
+	app "Go-Hexagonal/src/user/app"
 	domain "Go-Hexagonal/src/user/domain"
 	"net/http"
 	"time"
@@ -8,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func list(c *gin.Context, s domain.UserServicePort) {
-	filters := domain.ListUsersServiceFiltersDTO{}
+func list(c *gin.Context, s app.UserServicePort) {
+	filters := app.ListUsersServiceFiltersDTO{}
 
 	if nameQuery, nameExists := c.GetQuery("name"); nameExists {
 		filters.Name = &nameQuery

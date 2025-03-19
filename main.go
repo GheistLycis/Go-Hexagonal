@@ -13,11 +13,13 @@ import (
 
 var entry = "web"
 
-func main() {
+func init() {
 	if err := godotenv.Load(); err != nil { // TODO: implement env centralized service
 		log.Fatalf("Error loading .env file - %v", err)
 	}
+}
 
+func main() {
 	if args := os.Args; len(args) >= 2 {
 		entry = args[1]
 	}

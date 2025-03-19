@@ -4,7 +4,7 @@ import "bytes"
 
 type FilePort interface {
 	Validate() (bool, error)
-	GetName() *string
-	GetExtension() *string
+	GetName() string
+	GetExtension() string
 	GetBuffer() *bytes.Buffer
 }

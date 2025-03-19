@@ -3,14 +3,14 @@ package user
 import domain "Go-Hexagonal/src/user/domain"
 
 type UserService struct {
-	repo domain.UserRepoPort
+	repo UserRepoPort
 }
 
-func NewUserService(r domain.UserRepoPort) *UserService {
+func NewUserService(r UserRepoPort) *UserService {
 	return &UserService{repo: r}
 }
 
-func (s *UserService) Create(p domain.CreateUserServiceDTO, createdBy string) (domain.UserPort, error) {
+func (s *UserService) Create(p CreateUserServiceDTO, createdBy string) (domain.UserPort, error) {
 	user, err := domain.NewUser(p.Name, p.Email, p.Gender, p.BirthDate)
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func (s *UserService) Create(p domain.CreateUserServiceDTO, createdBy string) (d
 }
 
 func (s *UserService) Disable(id string, updatedBy string) (domain.UserPort, error) {
-	user, err := s.repo.Get(domain.GetUserRepoFiltersDTO{ID: &id})
+	user, err := s.repo.Get(GetUserRepoFiltersDTO{ID: &id})
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (s *UserService) Disable(id string, updatedBy string) (domain.UserPort, err
 }
 
 func (s *UserService) Enable(id string, updatedBy string) (domain.UserPort, error) {
-	user, err := s.repo.Get(domain.GetUserRepoFiltersDTO{ID: &id})
+	user, err := s.repo.Get(GetUserRepoFiltersDTO{ID: &id})
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +57,8 @@ func (s *UserService) Enable(id string, updatedBy string) (domain.UserPort, erro
 	return user, nil
 }
 
-func (s *UserService) Get(f domain.GetUserServiceFiltersDTO) (domain.UserPort, error) {
-	user, err := s.repo.Get(domain.GetUserRepoFiltersDTO(f))
+func (s *UserService) Get(f GetUserServiceFiltersDTO) (domain.UserPort, error) {
+	user, err := s.repo.Get(GetUserRepoFiltersDTO(f))
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +66,8 @@ func (s *UserService) Get(f domain.GetUserServiceFiltersDTO) (domain.UserPort, e
 	return user, nil
 }
 
-func (s *UserService) List(f domain.ListUsersServiceFiltersDTO) ([]domain.UserPort, error) {
-	users, err := s.repo.List(domain.ListUsersRepoFiltersDTO(f))
+func (s *UserService) List(f ListUsersServiceFiltersDTO) ([]domain.UserPort, error) {
+	users, err := s.repo.List(ListUsersRepoFiltersDTO(f))
 	if err != nil {
 		return nil, err
 	}

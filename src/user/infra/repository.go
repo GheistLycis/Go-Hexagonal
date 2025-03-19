@@ -1,6 +1,7 @@
 package user
 
 import (
+	app "Go-Hexagonal/src/user/app"
 	domain "Go-Hexagonal/src/user/domain"
 	"time"
 
@@ -55,7 +56,7 @@ func (r *UserRepository) Create(u domain.UserPort, createdBy string) (domain.Use
 	}, nil
 }
 
-func (r *UserRepository) Get(f domain.GetUserRepoFiltersDTO) (domain.UserPort, error) {
+func (r *UserRepository) Get(f app.GetUserRepoFiltersDTO) (domain.UserPort, error) {
 	user := &UserModel{}
 
 	if res := r.conn.First(user, f); res.Error != nil {
@@ -72,7 +73,7 @@ func (r *UserRepository) Get(f domain.GetUserRepoFiltersDTO) (domain.UserPort, e
 	}, nil
 }
 
-func (r *UserRepository) List(f domain.ListUsersRepoFiltersDTO) ([]domain.UserPort, error) {
+func (r *UserRepository) List(f app.ListUsersRepoFiltersDTO) ([]domain.UserPort, error) {
 	users := []UserModel{}
 
 	if res := r.conn.Find(&users); res.Error != nil {

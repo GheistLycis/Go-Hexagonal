@@ -15,8 +15,8 @@ func init() {
 }
 
 type File struct {
-	Name      *string       `valid:"-"`
-	Extension *string       `valid:"-"`
+	Name      string        `valid:"-"`
+	Extension string        `valid:"-"`
 	Buffer    *bytes.Buffer `valid:"-"`
 }
 
@@ -33,8 +33,8 @@ func init() {
 
 func NewFile(name string, extension string, buffer *bytes.Buffer) (*File, error) {
 	file := &File{
-		Name:      &name,
-		Extension: &extension,
+		Name:      name,
+		Extension: extension,
 		Buffer:    buffer,
 	}
 
@@ -58,6 +58,6 @@ func (u *File) Validate() (bool, error) {
 	return true, nil
 }
 
-func (u *File) GetName() *string         { return u.Name }
-func (u *File) GetExtension() *string    { return u.Extension }
+func (u *File) GetName() string          { return u.Name }
+func (u *File) GetExtension() string     { return u.Extension }
 func (u *File) GetBuffer() *bytes.Buffer { return u.Buffer }

@@ -94,10 +94,10 @@ func (s *FileTransferService) save(fi domain.FilePort, fo string) (string, error
 
 	fileName := time.Now().Format("2006-01-02T15:04:05")
 
-	if name := *fi.GetName(); name != "" {
+	if name := fi.GetName(); name != "" {
 		fileName = name
 	}
-	if ext := *fi.GetExtension(); ext != "" {
+	if ext := fi.GetExtension(); ext != "" {
 		fileName += "." + ext
 	}
 
