@@ -14,7 +14,7 @@ import (
 var entry = "web"
 
 func main() {
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(); err != nil { // TODO: implement env centralized service
 		log.Fatalf("Error loading .env file - %v", err)
 	}
 

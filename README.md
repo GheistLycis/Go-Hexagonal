@@ -71,3 +71,4 @@ nc localhost <TCP_PORT> < path/to/file
 -   **CLI cmd**: Implement an entry point for the file_transfer module to serve as the client to the TCP server, removing the need to use external tools to send files (such as netcat)
 -   **GUI**: Build an interface to interact with both CLI and TCP commands
 -   **Dockerization**: Implement Docker to avoid any initial setup
+-   **Unit tests**: Implement unit test coverage
