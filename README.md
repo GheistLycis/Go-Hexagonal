@@ -2,8 +2,6 @@
 
 Go-based implementation of the Hexagonal Architecture (Ports and Adapters), featuring both a HTTP server and a TCP server for P2P file transfers.
 
-## Features ⭐
-
 -   Web server implemented with Gin
 -   Database handling with GORM and PostgreSQL
 -   TCP file transfer service
