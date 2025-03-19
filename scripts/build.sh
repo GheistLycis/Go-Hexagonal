@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CMD=${1:-""}
+CMD=${1:-"web"}
 OUTPUT=${2:-"main"}
 OS=${3:-$(go env GOOS)}
 ARCH=${4:-$(go env GOARCH)}

@@ -27,7 +27,7 @@ Set a `.env` according to the `env.example` in the root.
 To compile:
 
 ```sh
-./scripts/build.sh <CMD=""> <OUTPUT="main"> <OS=user_os> <ARCH=user_os_arch>
+./scripts/build.sh <CMD="web"> <OUTPUT="main"> <OS=user_os> <ARCH=user_os_arch>
 ```
 
 ## Features 💻
