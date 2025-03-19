@@ -1,1 +1,1 @@
-go build -o bin/${2:-"main"} -ldflags="-X main.entry=${1:-"web"}" main.go
+go build -o bin/${2:-"main"} -ldflags="-X main.entry=${1:-""}" main.go
