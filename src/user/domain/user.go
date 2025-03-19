@@ -56,7 +56,7 @@ const (
 	OTHER  Gender = "OUTRO"
 )
 
-func NewUser(name string, email string, gender Gender, BirthDate time.Time) (UserPort, error) {
+func NewUser(name string, email string, gender Gender, BirthDate time.Time) (*User, error) {
 	user := &User{
 		ID:        uuid.NewV4().String(),
 		Status:    IN_ANALYSIS,

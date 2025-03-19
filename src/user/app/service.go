@@ -6,7 +6,7 @@ type UserService struct {
 	repo domain.UserRepoPort
 }
 
-func NewUserService(r domain.UserRepoPort) domain.UserServicePort {
+func NewUserService(r domain.UserRepoPort) *UserService {
 	return &UserService{repo: r}
 }
 
