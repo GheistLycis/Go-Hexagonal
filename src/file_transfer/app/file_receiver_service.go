@@ -111,6 +111,7 @@ func (s *FileReceiverService) download(f string) (string, error) { // TODO: use 
 	bufferExceeded := false
 
 	for {
+		// TODO: fix bug where Read blocks the execution indefinitely
 		n, err := s.conn.Read(chunk)
 		if err != nil && err != io.EOF {
 			return "", err
