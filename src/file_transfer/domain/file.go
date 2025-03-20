@@ -33,11 +33,11 @@ type File struct {
 	Buffer    *bytes.Buffer `valid:"-"`
 }
 
-func NewFile(name string, extension string, buffer *bytes.Buffer) (*File, error) {
+func NewFile(name string, extension string) (*File, error) {
 	file := &File{
 		Name:      name,
 		Extension: extension,
-		Buffer:    buffer,
+		Buffer:    &bytes.Buffer{},
 	}
 
 	if _, err := file.Validate(); err != nil {
@@ -47,19 +47,33 @@ func NewFile(name string, extension string, buffer *bytes.Buffer) (*File, error)
 	return file, nil
 }
 
-func (u *File) Validate() (bool, error) {
-	_, err := govalidator.ValidateStruct(u)
+func (f *File) Validate() (bool, error) {
+	_, err := govalidator.ValidateStruct(f)
 	if err != nil {
 		return false, err
 	}
 
-	if float64(u.Buffer.Len()) > maxSizeBytes {
+	if float64(f.Buffer.Len()) > maxSizeBytes {
 		return false, fmt.Errorf("o arquivo não pode ser maior que %.2f gB", maxSizeBytes/(1024*1024*1024))
 	}
 
 	return true, nil
 }
 
-func (u *File) GetName() string          { return u.Name }
-func (u *File) GetExtension() string     { return u.Extension }
-func (u *File) GetBuffer() *bytes.Buffer { return u.Buffer }
+func (f *File) WriteBuffer(b []byte) (int, error) {
+	n, err := f.Buffer.Write(b)
+	if err != nil {
+		return n, err
+	}
+
+	_, err = f.Validate()
+	if err != nil {
+		return n, err
+	}
+
+	return n, nil
+}
+
+func (f *File) GetName() string          { return f.Name }
+func (f *File) GetExtension() string     { return f.Extension }
+func (f *File) GetBuffer() *bytes.Buffer { return f.Buffer }

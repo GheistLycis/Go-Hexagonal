@@ -1,12 +1,12 @@
 package file_transfer
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"net"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -35,19 +35,16 @@ func (s *FileTransferService) HandleConnection() {
 		return
 	}
 
-	buffer, err := s.download()
+	file, err := domain.NewFile("", "")
+	if err != nil {
+		fmt.Printf("\n(%s) Error creating file: %v", s.peerIp, err)
+		return
+	}
+	err = s.download(file)
 	if err != nil {
 		fmt.Printf("\n(%s) Error downloading content: %v", s.peerIp, err)
 		return
 	}
-
-	file, err := domain.NewFile("", "", buffer)
-	if err != nil {
-		fmt.Printf("\n(%s) Invalid content received: %v", s.peerIp, err)
-		return
-	}
-
-	fmt.Printf("\n(%s) Content received (%.2f mB)", s.peerIp, float64(file.GetBuffer().Len())/(1024*1024))
 
 	outDir, err := s.save(file, s.peerIp)
 	if err != nil {
@@ -55,7 +52,7 @@ func (s *FileTransferService) HandleConnection() {
 		return
 	}
 
-	fmt.Printf("\n(%s) Content saved sucessfully (%s)!", s.peerIp, outDir)
+	fmt.Printf("\n(%s) Content saved sucessfully (%s)", s.peerIp, outDir)
 }
 
 func (s *FileTransferService) shutConnection() {
@@ -69,14 +66,37 @@ func (s *FileTransferService) peerIsTrusted() bool {
 	return slices.Contains(ipsWhitelist, s.peerIp)
 }
 
-func (s *FileTransferService) download() (*bytes.Buffer, error) {
-	var buffer bytes.Buffer
-
-	if _, err := io.Copy(&buffer, s.conn); err != nil {
-		return nil, err
+func (s *FileTransferService) download(f domain.FilePort) error { // TODO: use parallelism for faster transfer
+	chunkSize, err := strconv.ParseInt(os.Getenv("FT_CHUNK_MB"), 10, 64)
+	if err != nil {
+		return err
+	} else {
+		fmt.Println("CHUNK:", chunkSize)
+		chunkSize = chunkSize * 1024 * 1024
+		fmt.Println("CHUNK:", chunkSize)
 	}
 
-	return &buffer, nil
+	for {
+		fmt.Printf("\nReceiving file... (TOTAL = %.2f mB)", float64(f.GetBuffer().Len())/(1024*1024))
+
+		chunk := make([]byte, chunkSize)
+		n, err := s.conn.Read(chunk)
+
+		if n > 0 {
+			if _, err := f.WriteBuffer(chunk[:n]); err != nil {
+				return err
+			}
+		}
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *FileTransferService) save(fi domain.FilePort, fo string) (string, error) {
