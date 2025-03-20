@@ -116,10 +116,13 @@ func (s *FileTransferService) download(f string) (string, error) { // TODO: use 
 		s.conn.Write([]byte(msg))
 
 		n, err := s.conn.Read(chunk)
+		if err != nil && err != io.EOF {
+			return "", err
+		}
 
 		if n > 0 {
 			if _, err := file.WriteBuffer(chunk[:n]); err != nil {
-				if err.Error() == domain.ErrBufferExceeded.Error() {
+				if err == domain.ErrBufferExceeded {
 					bufferExceeded = true
 				} else {
 					return "", err
@@ -137,13 +140,8 @@ func (s *FileTransferService) download(f string) (string, error) { // TODO: use 
 			bufferExceeded = false
 
 			if err == io.EOF {
-				fmt.Print("EOF")
 				break
 			}
-		}
-
-		if err != nil && err != io.EOF {
-			return "", err
 		}
 	}
 
@@ -158,7 +156,7 @@ func (s *FileTransferService) save(fi domain.FilePort, fo string) (string, error
 	}
 
 	outPath := outDir + fi.GetName() + fi.GetExtension()
-	outFile, err := os.Create(outPath)
+	outFile, err := os.OpenFile(outPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return "", err
 	}
@@ -167,6 +165,10 @@ func (s *FileTransferService) save(fi domain.FilePort, fo string) (string, error
 
 	_, err = io.Copy(outFile, fi.GetBuffer())
 	if err != nil {
+		return "", err
+	}
+
+	if err := outFile.Sync(); err != nil {
 		return "", err
 	}
 

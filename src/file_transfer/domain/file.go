@@ -12,26 +12,28 @@ import (
 )
 
 var maxSize float64
-var ErrSizeExceeded = fmt.Errorf("file size exceeded the limit (%.2f mB)", maxSize/(1024*1024))
+var ErrSizeExceeded error
 var maxBufferSize float64
-var ErrBufferExceeded = fmt.Errorf("buffer size exceeded the limit (%.2f mB)", maxBufferSize/(1024*1024))
+var ErrBufferExceeded error
 
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file - %v", err)
 	}
 
-	maxBufferSizeMb, err := strconv.ParseFloat(os.Getenv("FT_BUFF_MB"), 64)
-	if err != nil {
-		log.Fatalf("Failed to parse ENV variable FT_BUFF_MB - %v", err)
-	}
-	maxBufferSize = maxBufferSizeMb * 1024 * 1024
-
 	maxSizeGb, err := strconv.ParseFloat(os.Getenv("FT_MAX_GB"), 64)
 	if err != nil {
 		log.Fatalf("Failed to parse ENV variable FT_MAX_GB - %v", err)
 	}
 	maxSize = maxSizeGb * 1024 * 1024 * 1024
+	ErrSizeExceeded = fmt.Errorf("file size exceeded the limit (%.2f mB)", maxSize/(1024*1024))
+
+	maxBufferSizeMb, err := strconv.ParseFloat(os.Getenv("FT_BUFF_MB"), 64)
+	if err != nil {
+		log.Fatalf("Failed to parse ENV variable FT_BUFF_MB - %v", err)
+	}
+	maxBufferSize = maxBufferSizeMb * 1024 * 1024
+	ErrBufferExceeded = fmt.Errorf("buffer size exceeded the limit (%.2f mB)", maxBufferSize/(1024*1024))
 
 	govalidator.SetFieldsRequiredByDefault(true)
 }
