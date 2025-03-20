@@ -111,14 +111,14 @@ func (s *FileReceiverService) download(f string) (string, error) { // TODO: use 
 	bufferExceeded := false
 
 	for {
-		msg := fmt.Sprintf("\nReceiving file... (TOTAL = %d mB)", file.GetSize()/(1024*1024))
-		fmt.Print(msg)
-		s.conn.Write([]byte(msg))
-
 		n, err := s.conn.Read(chunk)
 		if err != nil && err != io.EOF {
 			return "", err
 		}
+
+		msg := fmt.Sprintf("\nReceiving file... (TOTAL = %d mB)", file.GetSize()/(1024*1024))
+		fmt.Print(msg)
+		s.conn.Write([]byte(msg))
 
 		if n > 0 {
 			if _, err := file.WriteBuffer(chunk[:n]); err != nil {
