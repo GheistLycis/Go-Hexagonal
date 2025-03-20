@@ -15,7 +15,7 @@ SetRouter maps all routes in User context to their handlers.
 -DB: the database active connection
 */
 func SetRouter(g *gin.Engine, DB *gorm.DB) {
-	repo := infra.NewUserRepo(DB) // TODO: implement singleton deps container (or not?)
+	repo := infra.NewUserRepo(DB) // ? implement singleton deps container
 	service := app.NewUserService(repo)
 
 	g.GET("user/:id", handle(getById, service))

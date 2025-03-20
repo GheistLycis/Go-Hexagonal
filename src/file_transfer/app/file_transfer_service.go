@@ -3,6 +3,7 @@ package file_transfer
 import (
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 	"slices"
@@ -11,7 +12,44 @@ import (
 	"time"
 
 	domain "Go-Hexagonal/src/file_transfer/domain"
+
+	"github.com/joho/godotenv"
 )
+
+var timeOut time.Duration
+var workDir string
+var outFolder string
+var osSep string
+var maxBufferSize float64
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file - %v", err)
+	}
+
+	timeOutMins, err := strconv.Atoi(os.Getenv("FT_TIMEOUT_MINS"))
+	if err != nil {
+		fmt.Printf("Failed to parse ENV variable FT_TIMEOUT_MINS - %v", err)
+		return
+	}
+	timeOut = time.Duration(timeOutMins)
+
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to get working directory - %v", err)
+	}
+	workDir = wd
+
+	outFolder = os.Getenv("FT_OUT_DIR")
+
+	osSep = string(os.PathSeparator)
+
+	maxBufferSizeMb, err := strconv.ParseFloat(os.Getenv("FT_BUFF_MB"), 64)
+	if err != nil {
+		log.Fatalf("Failed to parse ENV variable FT_BUFF_MB - %v", err)
+	}
+	maxBufferSize = maxBufferSizeMb * 1024 * 1024
+}
 
 type FileTransferService struct {
 	conn   net.Conn
@@ -28,34 +66,30 @@ func NewFileTranserService(c net.Conn) *FileTransferService { // TODO: use gener
 func (s *FileTransferService) HandleConnection() {
 	defer s.shutConnection()
 
+	s.conn.SetReadDeadline(time.Now().Add(timeOut * time.Minute))
+
 	if s.peerIsTrusted() {
+		s.conn.Write([]byte("\nConnection stablished"))
 		fmt.Printf("\nStablished connection with %s", s.peerIp)
 	} else {
+		s.conn.Write([]byte("\nConnection refused"))
 		fmt.Printf("\nDenied connection with %s", s.peerIp)
 		return
 	}
 
-	file, err := domain.NewFile("", "")
+	outDir, err := s.download(s.peerIp)
 	if err != nil {
-		fmt.Printf("\n(%s) Error creating file: %v", s.peerIp, err)
-		return
-	}
-	err = s.download(file)
-	if err != nil {
+		s.conn.Write([]byte("\nError downloading content"))
 		fmt.Printf("\n(%s) Error downloading content: %v", s.peerIp, err)
 		return
 	}
 
-	outDir, err := s.save(file, s.peerIp)
-	if err != nil {
-		fmt.Printf("\n(%s) Error saving content: %v", s.peerIp, err)
-		return
-	}
-
-	fmt.Printf("\n(%s) Content saved sucessfully (%s)", s.peerIp, outDir)
+	s.conn.Write([]byte("\nContent downloaded sucessfully"))
+	fmt.Printf("\n(%s) Content downloaded sucessfully (%s)", s.peerIp, outDir)
 }
 
 func (s *FileTransferService) shutConnection() {
+	s.conn.Write([]byte("\nClosing connection"))
 	fmt.Printf("\nClosing connection with %s", s.peerIp)
 	s.conn.Close()
 }
@@ -66,62 +100,64 @@ func (s *FileTransferService) peerIsTrusted() bool {
 	return slices.Contains(ipsWhitelist, s.peerIp)
 }
 
-func (s *FileTransferService) download(f domain.FilePort) error { // TODO: use parallelism for faster transfer
-	chunkSize, err := strconv.ParseInt(os.Getenv("FT_CHUNK_MB"), 10, 64)
+func (s *FileTransferService) download(f string) (string, error) { // TODO: use parallelism for faster transfer
+	file, err := domain.NewFile(time.Now().Format("2006-01-02T15:04:05"), "")
 	if err != nil {
-		return err
-	} else {
-		fmt.Println("CHUNK:", chunkSize)
-		chunkSize = chunkSize * 1024 * 1024
-		fmt.Println("CHUNK:", chunkSize)
+		fmt.Printf("\n(%s) Error creating file: %v", s.peerIp, err)
+		return "", err
 	}
+	var outPath string
+	chunk := make([]byte, int(maxBufferSize))
+	bufferExceeded := false
 
 	for {
-		fmt.Printf("\nReceiving file... (TOTAL = %.2f mB)", float64(f.GetBuffer().Len())/(1024*1024))
+		msg := fmt.Sprintf("\nReceiving file... (TOTAL = %d mB)", file.GetSize()/(1024*1024))
+		fmt.Print(msg)
+		s.conn.Write([]byte(msg))
 
-		chunk := make([]byte, chunkSize)
 		n, err := s.conn.Read(chunk)
 
 		if n > 0 {
-			if _, err := f.WriteBuffer(chunk[:n]); err != nil {
-				return err
+			if _, err := file.WriteBuffer(chunk[:n]); err != nil {
+				if err.Error() == domain.ErrBufferExceeded.Error() {
+					bufferExceeded = true
+				} else {
+					return "", err
+				}
 			}
 		}
-		if err != nil {
-			if err == io.EOF {
-				break
+
+		if bufferExceeded || err == io.EOF {
+			outPath, err = s.save(file, f)
+			if err != nil {
+				return "", err
 			}
 
-			return err
+			file.ClearBuffer()
+			bufferExceeded = false
+
+			if err == io.EOF {
+				fmt.Print("EOF")
+				break
+			}
+		}
+
+		if err != nil && err != io.EOF {
+			return "", err
 		}
 	}
 
-	return nil
+	return outPath, nil
 }
 
 func (s *FileTransferService) save(fi domain.FilePort, fo string) (string, error) {
-	sep := string(os.PathSeparator)
-	workDir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	outDir := workDir + sep + os.Getenv("FT_OUT_DIR") + sep + fo + sep
+	outDir := workDir + osSep + outFolder + osSep + fo + osSep
 
 	if err := os.MkdirAll(outDir, os.ModePerm); err != nil {
 		return "", err
 	}
 
-	fileName := time.Now().Format("2006-01-02T15:04:05")
-
-	if name := fi.GetName(); name != "" {
-		fileName = name
-	}
-	if ext := fi.GetExtension(); ext != "" {
-		fileName += "." + ext
-	}
-
-	outPath := outDir + fileName
+	outPath := outDir + fi.GetName() + fi.GetExtension()
 	outFile, err := os.Create(outPath)
 	if err != nil {
 		return "", err
