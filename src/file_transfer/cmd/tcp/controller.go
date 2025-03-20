@@ -19,6 +19,6 @@ func HandleServer(l net.Listener) {
 			return
 		}
 
-		go app.NewFileTranserService(conn).HandleConnection()
+		go app.NewFileReceiverService(conn).HandleConnection()
 	}
 }

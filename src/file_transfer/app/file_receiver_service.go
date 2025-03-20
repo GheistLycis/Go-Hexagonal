@@ -51,19 +51,19 @@ func init() {
 	maxBufferSize = maxBufferSizeMb * 1024 * 1024
 }
 
-type FileTransferService struct {
+type FileReceiveService struct {
 	conn   net.Conn
 	peerIp string
 }
 
-func NewFileTranserService(c net.Conn) *FileTransferService { // TODO: use generic interface for connection adapter
-	return &FileTransferService{
+func NewFileReceiverService(c net.Conn) *FileReceiveService { // TODO: use generic interface for connection adapter
+	return &FileReceiveService{
 		conn:   c,
 		peerIp: strings.Split(c.RemoteAddr().String(), ":")[0],
 	}
 }
 
-func (s *FileTransferService) HandleConnection() {
+func (s *FileReceiveService) HandleConnection() {
 	defer s.shutConnection()
 
 	s.conn.SetReadDeadline(time.Now().Add(timeOut * time.Minute))
@@ -88,19 +88,19 @@ func (s *FileTransferService) HandleConnection() {
 	fmt.Printf("\n(%s) Content downloaded sucessfully (%s)", s.peerIp, outDir)
 }
 
-func (s *FileTransferService) shutConnection() {
+func (s *FileReceiveService) shutConnection() {
 	s.conn.Write([]byte("\nClosing connection"))
 	fmt.Printf("\nClosing connection with %s", s.peerIp)
 	s.conn.Close()
 }
 
-func (s *FileTransferService) peerIsTrusted() bool {
+func (s *FileReceiveService) peerIsTrusted() bool {
 	ipsWhitelist := strings.Split(os.Getenv("FT_IP_WHITELIST"), ",")
 
 	return slices.Contains(ipsWhitelist, s.peerIp)
 }
 
-func (s *FileTransferService) download(f string) (string, error) { // TODO: use parallelism for faster transfer
+func (s *FileReceiveService) download(f string) (string, error) { // TODO: use parallelism for faster transfer
 	file, err := domain.NewFile(time.Now().Format("2006-01-02T15:04:05"), "")
 	if err != nil {
 		fmt.Printf("\n(%s) Error creating file: %v", s.peerIp, err)
@@ -148,7 +148,7 @@ func (s *FileTransferService) download(f string) (string, error) { // TODO: use 
 	return outPath, nil
 }
 
-func (s *FileTransferService) save(fi domain.FilePort, fo string) (string, error) {
+func (s *FileReceiveService) save(fi domain.FilePort, fo string) (string, error) {
 	outDir := workDir + osSep + outFolder + osSep + fo + osSep
 
 	if err := os.MkdirAll(outDir, os.ModePerm); err != nil {
