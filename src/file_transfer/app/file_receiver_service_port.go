@@ -1,5 +1,5 @@
 package file_transfer
 
-type FileReceiveServicePort interface {
+type FileReceiverServicePort interface {
 	HandleConnection()
 }

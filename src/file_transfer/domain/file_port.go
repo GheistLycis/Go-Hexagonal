@@ -8,5 +8,6 @@ type FilePort interface {
 	ClearBuffer() error
 	GetName() string
 	GetExtension() string
+	GetSize() int
 	GetBuffer() *bytes.Buffer
 }
