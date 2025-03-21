@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -16,7 +15,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var timeOut time.Duration
 var workDir string
 var outFolder string
 var osSep string
@@ -26,13 +24,6 @@ func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file - %v", err)
 	}
-
-	timeOutMins, err := strconv.Atoi(os.Getenv("FT_TIMEOUT_MINS"))
-	if err != nil {
-		fmt.Printf("Failed to parse ENV variable FT_TIMEOUT_MINS - %v", err)
-		return
-	}
-	timeOut = time.Duration(timeOutMins)
 
 	wd, err := os.Getwd()
 	if err != nil {
@@ -64,19 +55,6 @@ func NewFileReceiverService(c net.Conn) FileReceiverServicePort { // TODO: use g
 }
 
 func (s *FileReceiverService) HandleConnection() {
-	defer s.shutConnection()
-
-	s.conn.SetReadDeadline(time.Now().Add(timeOut * time.Minute))
-
-	if s.peerIsTrusted() {
-		s.conn.Write([]byte("\nConnection stablished"))
-		fmt.Printf("\nStablished connection with %s", s.peerIp)
-	} else {
-		s.conn.Write([]byte("\nConnection refused"))
-		fmt.Printf("\nDenied connection with %s", s.peerIp)
-		return
-	}
-
 	outDir, err := s.download(s.peerIp)
 	if err != nil {
 		s.conn.Write([]byte("\nError downloading content"))
@@ -88,19 +66,7 @@ func (s *FileReceiverService) HandleConnection() {
 	fmt.Printf("\n(%s) Content downloaded sucessfully (%s)", s.peerIp, outDir)
 }
 
-func (s *FileReceiverService) shutConnection() {
-	s.conn.Write([]byte("\nClosing connection"))
-	fmt.Printf("\nClosing connection with %s", s.peerIp)
-	s.conn.Close()
-}
-
-func (s *FileReceiverService) peerIsTrusted() bool {
-	ipsWhitelist := strings.Split(os.Getenv("FT_IP_WHITELIST"), ",")
-
-	return slices.Contains(ipsWhitelist, s.peerIp)
-}
-
-func (s *FileReceiverService) download(f string) (string, error) { // TODO: use parallelism for faster transfer
+func (s *FileReceiverService) download(f string) (string, error) { // ? use parallelism for faster transfer
 	file, err := domain.NewFile(time.Now().Format("2006-01-02T15:04:05"), "")
 	if err != nil {
 		fmt.Printf("\n(%s) Error creating file: %v", s.peerIp, err)
@@ -111,7 +77,6 @@ func (s *FileReceiverService) download(f string) (string, error) { // TODO: use 
 	bufferExceeded := false
 
 	for {
-		// TODO: fix bug where Read blocks the execution indefinitely
 		n, err := s.conn.Read(chunk)
 		if err != nil && err != io.EOF {
 			return "", err
