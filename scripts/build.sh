@@ -7,7 +7,11 @@ ARCH=${4:-$(go env GOARCH)}
 
 echo "Compiling $CMD for $OS/$ARCH into /bin/$OUTPUT..."
 
-GOOS=$OS GOARCH=$ARCH go build -o bin/$OUTPUT -ldflags="-X main.entry=$CMD" main.go
+GOOS=$OS GOARCH=$ARCH \
+    go build \
+    -o bin/$OUTPUT \
+    -ldflags="-X main.isBuild=true -X main.entry=$CMD" \
+    main.go
 
 if [ $? -eq 0 ]; then
     echo "Build successful"

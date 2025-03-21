@@ -18,7 +18,7 @@ func Init() {
 		log.Fatalf("[TCP] Failed to parse ENV variable TCP_PORT - %v", err)
 	}
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", serverPort))
+	listener, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", serverPort))
 	if err != nil {
 		log.Fatalf("Failed to init TCP server - %v", err)
 	}
