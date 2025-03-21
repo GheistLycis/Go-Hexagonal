@@ -1,6 +1,7 @@
 package file_transfer
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io"
 	"log"
@@ -66,46 +67,43 @@ func (s *FileReceiverService) HandleConnection() {
 	fmt.Printf("\n(%s) Content downloaded sucessfully (%s)", s.peerIp, outDir)
 }
 
-func (s *FileReceiverService) download(f string) (string, error) { // ? use parallelism for faster transfer
-	file, err := domain.NewFile(time.Now().Format("2006-01-02T15:04:05"), "")
+func (s *FileReceiverService) download(f string) (string, error) {
+	var totalRead int64
+	var outPath string
+	file, err := domain.NewFile(
+		time.Now().Format("2006-01-02T15:04:05"),
+		"",
+		0,
+	)
 	if err != nil {
 		fmt.Printf("\n(%s) Error creating file: %v", s.peerIp, err)
 		return "", err
 	}
-	var outPath string
-	chunk := make([]byte, int(maxBufferSize))
-	bufferExceeded := false
+
+	binary.Read(s.conn, binary.LittleEndian, file.GetSize())
+	fmt.Printf("\n(%s) Total file size to be received: %d", s.peerIp, *file.GetSize())
+	time.Sleep(2 * time.Second)
 
 	for {
-		n, err := s.conn.Read(chunk)
-		if err != nil && err != io.EOF {
+		if _, err := file.Validate(); err != nil {
 			return "", err
 		}
 
-		msg := fmt.Sprintf("\nReceiving file... (TOTAL = %d mB)", file.GetSize()/(1024*1024))
+		msg := fmt.Sprintf("\nReceiving file... (TOTAL = %d mB)", totalRead/(1024*1024))
 		fmt.Print(msg)
 		s.conn.Write([]byte(msg))
 
-		if n > 0 {
-			if _, err := file.WriteBuffer(chunk[:n]); err != nil {
-				if err == domain.ErrBufferExceeded {
-					bufferExceeded = true
-				} else {
-					return "", err
-				}
-			}
-		}
-
-		if bufferExceeded || err == io.EOF {
-			outPath, err = s.save(file, f)
-			if err != nil {
+		if n, err := io.CopyN(file.GetBuffer(), s.conn, int64(maxBufferSize)); err != nil && err != io.EOF {
+			return "", err
+		} else {
+			if outPath, err = s.save(file, f); err != nil {
 				return "", err
 			}
 
-			file.ClearBuffer()
-			bufferExceeded = false
+			file.GetBuffer().Reset()
+			totalRead += n
 
-			if err == io.EOF {
+			if totalRead == *file.GetSize() {
 				break
 			}
 		}
