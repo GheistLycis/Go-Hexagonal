@@ -52,23 +52,33 @@ Access it at `http://localhost:<WEB_PORT>`
 
 #### Usage
 
-Start the TCP server with:
+Start the TCP server to receive files with:
 
 ```sh
 ./scripts/run.sh tcp
 ```
 
-Send a file:
+### CLI
+
+#### Usage
+
+Start the CLI to send files to the TCP server with:
 
 ```sh
-nc localhost <TCP_PORT> < path/to/file
+./scripts/run.sh cli <ADDRESS> <PORT> <FILE_PATH>
+```
+
+Or, if you're running the compiled app:
+
+```sh
+bin/<BIN_PATH> <ADDRESS> <PORT> <FILE_PATH>
 ```
 
 ## Roadmap 🚀
 
 -   ✅ **Web server**: Hexagonal POC in Go
 -   ✅ **TCP server**: Server to receive P2P file transfers
--   **CLI cmd**: Implement an entry point for the file_transfer module to serve as the client to the TCP server, removing the need to use external tools to send files (such as netcat)
+-   ✅ **CLI cmd**: Implement an entry point for the file_transfer module to serve as the client to the TCP server, removing the need to use external tools to send files (such as netcat)
 -   **GUI**: Build an interface to interact with both CLI and TCP commands
 -   **Dockerization**: Implement Docker to avoid any initial setup
 -   **Unit tests**: Implement unit test coverage

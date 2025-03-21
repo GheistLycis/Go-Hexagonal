@@ -81,7 +81,7 @@ func (s *FileReceiverService) download(f string) (string, error) {
 	}
 
 	binary.Read(s.conn, binary.LittleEndian, file.GetSize())
-	fmt.Printf("\n(%s) Total file size to be received: %d", s.peerIp, *file.GetSize())
+	fmt.Printf("\n(%s) Total file size to be received: %d mB", s.peerIp, *file.GetSize()/(1024*1024))
 	time.Sleep(2 * time.Second)
 
 	for {
@@ -93,19 +93,20 @@ func (s *FileReceiverService) download(f string) (string, error) {
 		fmt.Print(msg)
 		s.conn.Write([]byte(msg))
 
-		if n, err := io.CopyN(file.GetBuffer(), s.conn, int64(maxBufferSize)); err != nil && err != io.EOF {
+		n, err := io.CopyN(file.GetBuffer(), s.conn, int64(maxBufferSize))
+		if err != nil && err != io.EOF {
 			return "", err
-		} else {
-			if outPath, err = s.save(file, f); err != nil {
-				return "", err
-			}
+		}
 
-			file.GetBuffer().Reset()
-			totalRead += n
+		if outPath, err = s.save(file, f); err != nil {
+			return "", err
+		}
 
-			if totalRead == *file.GetSize() {
-				break
-			}
+		file.GetBuffer().Reset()
+		totalRead += n
+
+		if totalRead == *file.GetSize() {
+			break
 		}
 	}
 
