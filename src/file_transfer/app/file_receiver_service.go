@@ -1,7 +1,7 @@
 package file_transfer
 
 import (
-	"encoding/binary"
+	"encoding/gob"
 	"fmt"
 	"io"
 	"log"
@@ -9,7 +9,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	domain "Go-Hexagonal/src/file_transfer/domain"
 
@@ -19,7 +18,7 @@ import (
 var workDir string
 var outFolder string
 var osSep string
-var maxBufferSize float64
+var maxBufferSize int64
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -40,7 +39,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("Failed to parse ENV variable FT_BUFF_MB - %v", err)
 	}
-	maxBufferSize = maxBufferSizeMb * 1024 * 1024
+	maxBufferSize = int64(maxBufferSizeMb * 1024 * 1024)
 }
 
 type FileReceiverService struct {
@@ -58,42 +57,37 @@ func NewFileReceiverService(c net.Conn) FileReceiverServicePort { // TODO: use g
 func (s *FileReceiverService) HandleConnection() {
 	outDir, err := s.download(s.peerIp)
 	if err != nil {
-		s.conn.Write([]byte("\nError downloading content"))
 		fmt.Printf("\n(%s) Error downloading content: %v", s.peerIp, err)
+		s.conn.Write([]byte("\nError downloading content"))
 		return
 	}
 
-	s.conn.Write([]byte("\nContent downloaded sucessfully"))
 	fmt.Printf("\n(%s) Content downloaded sucessfully (%s)", s.peerIp, outDir)
+	s.conn.Write([]byte("\nContent downloaded sucessfully"))
 }
 
 func (s *FileReceiverService) download(f string) (string, error) {
 	var totalRead int64
 	var outPath string
-	file, err := domain.NewFile(
-		time.Now().Format("2006-01-02T15:04:05"),
-		"",
-		0,
-	)
+	file, err := domain.NewFile("", "", []byte{})
 	if err != nil {
-		fmt.Printf("\n(%s) Error creating file: %v", s.peerIp, err)
 		return "", err
 	}
 
-	binary.Read(s.conn, binary.LittleEndian, file.GetSize())
-	fmt.Printf("\n(%s) Total file size to be received: %d mB", s.peerIp, *file.GetSize()/(1024*1024))
-	time.Sleep(2 * time.Second)
+	// * Receiving file "contract"
+	if err := gob.NewDecoder(s.conn).Decode(file); err != nil {
+		return "", err
+	}
 
+	fmt.Printf("\n(%s) Receiving %s (%d mB)...", s.peerIp, file.GetName()+file.GetExtension(), file.GetSize()/(1024*1024))
+
+	// * Receiving file data
 	for {
-		if _, err := file.Validate(); err != nil {
-			return "", err
-		}
-
-		msg := fmt.Sprintf("\nReceiving file... (TOTAL = %d mB)", totalRead/(1024*1024))
+		msg := fmt.Sprintf("\nDownloading data... (TOTAL = %d mB)", totalRead/(1024*1024))
 		fmt.Print(msg)
 		s.conn.Write([]byte(msg))
 
-		n, err := io.CopyN(file.GetBuffer(), s.conn, int64(maxBufferSize))
+		n, err := io.CopyN(file.GetData(), s.conn, maxBufferSize)
 		if err != nil && err != io.EOF {
 			return "", err
 		}
@@ -101,11 +95,7 @@ func (s *FileReceiverService) download(f string) (string, error) {
 		if outPath, err = s.save(file, f); err != nil {
 			return "", err
 		}
-
-		file.GetBuffer().Reset()
-		totalRead += n
-
-		if totalRead == *file.GetSize() {
+		if totalRead += int64(n); totalRead == file.GetSize() {
 			break
 		}
 	}
@@ -121,19 +111,17 @@ func (s *FileReceiverService) save(fi domain.FilePort, fo string) (string, error
 	}
 
 	outPath := outDir + fi.GetName() + fi.GetExtension()
-	outFile, err := os.OpenFile(outPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	osFile, err := os.OpenFile(outPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return "", err
 	}
 
-	defer outFile.Close()
+	defer osFile.Close()
 
-	_, err = io.Copy(outFile, fi.GetBuffer())
-	if err != nil {
+	if _, err = io.Copy(osFile, fi.GetData()); err != nil {
 		return "", err
 	}
-
-	if err := outFile.Sync(); err != nil {
+	if err := osFile.Sync(); err != nil {
 		return "", err
 	}
 

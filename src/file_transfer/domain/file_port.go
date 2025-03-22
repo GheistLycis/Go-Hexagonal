@@ -6,6 +6,6 @@ type FilePort interface {
 	Validate() (isValid bool, err error)
 	GetName() string
 	GetExtension() string
-	GetSize() *int64
-	GetBuffer() *bytes.Buffer
+	GetSize() int64
+	GetData() *bytes.Buffer
 }

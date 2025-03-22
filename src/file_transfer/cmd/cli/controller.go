@@ -14,7 +14,7 @@ func HandleCommands(cmd CommandsDTO) {
 	// TODO: handle IPv6 addresses
 	conn, err := net.Dial(cmd.Protocol, fmt.Sprintf("%s:%d", cmd.Address, cmd.Port))
 	if err != nil {
-		log.Fatalf("Failed to stablish connection - %v", err)
+		log.Fatalf("Failed to establish connection - %v", err)
 	}
 
 	defer conn.Close()
