@@ -74,14 +74,12 @@ func (s *FileReceiverService) download(f string) (string, error) {
 		return "", err
 	}
 
-	// * Receiving file "contract"
 	if err := gob.NewDecoder(s.conn).Decode(file); err != nil {
 		return "", err
 	}
 
 	fmt.Printf("\n(%s) Receiving %s (%d mB)...", s.peerIp, file.GetName()+file.GetExtension(), file.GetSize()/(1024*1024))
 
-	// * Receiving file data
 	for {
 		msg := fmt.Sprintf("\nDownloading data... (TOTAL = %d mB)", totalRead/(1024*1024))
 		fmt.Print(msg)

@@ -12,6 +12,8 @@ import (
 	domain "Go-Hexagonal/src/file_transfer/domain"
 )
 
+var msgMaxSize = 100 * 1024
+
 type FileSenderService struct {
 	conn net.Conn
 }
@@ -23,6 +25,8 @@ func NewFileSenderService(c net.Conn) FileSenderServicePort { // TODO: use gener
 }
 
 func (s *FileSenderService) HandleConnection(fp string) {
+	go s.listenForMessages()
+
 	file, err := s.getFile(fp)
 	if err != nil {
 		log.Fatalf("Error reading file - %v", err)
@@ -33,6 +37,24 @@ func (s *FileSenderService) HandleConnection(fp string) {
 		log.Fatalf("Error sending file - %v", err)
 		return
 	}
+}
+
+func (s *FileSenderService) listenForMessages() error {
+	buffer := make([]byte, msgMaxSize)
+
+	for {
+		n, err := s.conn.Read(buffer)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+
+		fmt.Println(string(buffer[:n]))
+	}
+
+	return nil
 }
 
 func (s *FileSenderService) getFile(fp string) (domain.FilePort, error) {
@@ -76,27 +98,8 @@ func (s *FileSenderService) upload(f domain.FilePort) error {
 		return err
 	}
 
-	if _, err := io.Copy(s.conn, f.GetData()); err != nil {
+	if _, err := io.CopyN(s.conn, f.GetData(), f.GetSize()); err != nil {
 		return err
-	}
-
-	return s.listenMessages()
-}
-
-func (s *FileSenderService) listenMessages() error {
-	msgMaxSize := 100 * 1024
-	buffer := make([]byte, msgMaxSize)
-
-	for {
-		n, err := s.conn.Read(buffer)
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
-		}
-
-		fmt.Println(string(buffer[:n]))
 	}
 
 	return nil
