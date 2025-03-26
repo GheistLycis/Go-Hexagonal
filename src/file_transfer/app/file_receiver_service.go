@@ -47,7 +47,7 @@ type FileReceiverService struct {
 	peerIp string
 }
 
-func NewFileReceiverService(c net.Conn) FileReceiverServicePort { // TODO: use generic interface for connection adapter
+func NewFileReceiverService(c net.Conn) *FileReceiverService { // TODO: use generic interface for connection adapter
 	return &FileReceiverService{
 		conn:   c,
 		peerIp: strings.Split(c.RemoteAddr().String(), ":")[0],

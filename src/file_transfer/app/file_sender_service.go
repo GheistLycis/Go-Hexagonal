@@ -18,7 +18,7 @@ type FileSenderService struct {
 	conn net.Conn
 }
 
-func NewFileSenderService(c net.Conn) FileSenderServicePort { // TODO: use generic interface for connection adapter
+func NewFileSenderService(c net.Conn) *FileSenderService { // TODO: use generic interface for connection adapter
 	return &FileSenderService{
 		conn: c,
 	}
@@ -98,7 +98,7 @@ func (s *FileSenderService) upload(f domain.FilePort) error {
 		return err
 	}
 
-	if _, err := io.CopyN(s.conn, f.GetData(), f.GetSize()); err != nil {
+	if _, err := io.Copy(s.conn, f.GetData()); err != nil {
 		return err
 	}
 

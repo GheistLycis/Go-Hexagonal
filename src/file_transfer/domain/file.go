@@ -35,7 +35,7 @@ type File struct {
 	Data      *bytes.Buffer `valid:"-"`
 }
 
-func NewFile(name string, extension string, data []byte) (FilePort, error) {
+func NewFile(name string, extension string, data []byte) (*File, error) {
 	file := &File{
 		Name:      name,
 		Extension: extension,
