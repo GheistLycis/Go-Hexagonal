@@ -1,7 +1,7 @@
 package file_transfer
 
 import (
-	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -55,71 +55,42 @@ func NewFileReceiverService(c net.Conn) *FileReceiverService { // TODO: use gene
 }
 
 func (s *FileReceiverService) HandleConnection() {
-	outDir, err := s.download(s.peerIp)
+	outPath, err := s.download(s.peerIp)
 	if err != nil {
 		fmt.Printf("\n(%s) Error downloading content: %v", s.peerIp, err)
 		s.conn.Write([]byte("\nError downloading content"))
 		return
 	}
 
-	fmt.Printf("\n(%s) Content downloaded sucessfully (%s)", s.peerIp, outDir)
+	fmt.Printf("\n(%s) Content downloaded sucessfully (%s)", s.peerIp, outPath)
 	s.conn.Write([]byte("\nContent downloaded sucessfully"))
 }
 
 func (s *FileReceiverService) download(f string) (string, error) {
-	var totalRead int64
-	var outPath string
-	file, err := domain.NewFile("", "", []byte{})
-	if err != nil {
+	var file domain.File
+	if err := json.NewDecoder(s.conn).Decode(&file); err != nil {
 		return "", err
 	}
-
-	if err := gob.NewDecoder(s.conn).Decode(file); err != nil {
+	if err := file.Validate(); err != nil {
 		return "", err
 	}
+	msg := fmt.Sprintf("\nReceiving %s (%d mB)...", file.Name+file.Extension, file.Size/(1024*1024))
+	fmt.Print(msg)
+	s.conn.Write([]byte(msg))
 
-	fmt.Printf("\n(%s) Receiving %s (%d mB)...", s.peerIp, file.GetName()+file.GetExtension(), file.GetSize()/(1024*1024))
-
-	for {
-		msg := fmt.Sprintf("\nDownloading data... (TOTAL = %d mB)", totalRead/(1024*1024))
-		fmt.Print(msg)
-		s.conn.Write([]byte(msg))
-
-		n, err := io.CopyN(file.GetData(), s.conn, maxBufferSize)
-		if err != nil && err != io.EOF {
-			return "", err
-		}
-
-		if outPath, err = s.save(file, f); err != nil {
-			return "", err
-		}
-		if totalRead += int64(n); totalRead == file.GetSize() {
-			break
-		}
-	}
-
-	return outPath, nil
-}
-
-func (s *FileReceiverService) save(fi domain.FilePort, fo string) (string, error) {
-	outDir := workDir + osSep + outFolder + osSep + fo + osSep
-
+	outDir := workDir + osSep + outFolder + osSep + f + osSep
 	if err := os.MkdirAll(outDir, os.ModePerm); err != nil {
 		return "", err
 	}
-
-	outPath := outDir + fi.GetName() + fi.GetExtension()
-	osFile, err := os.OpenFile(outPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	outPath := outDir + file.Name + file.Extension
+	osFile, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return "", err
 	}
 
 	defer osFile.Close()
 
-	if _, err = io.Copy(osFile, fi.GetData()); err != nil {
-		return "", err
-	}
-	if err := osFile.Sync(); err != nil {
+	if _, err = io.CopyN(osFile, s.conn, file.Size); err != nil {
 		return "", err
 	}
 

@@ -2,10 +2,12 @@ package file_transfer
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/asaskevich/govalidator"
@@ -35,11 +37,11 @@ type File struct {
 	Data      *bytes.Buffer `valid:"-"`
 }
 
-func NewFile(name string, extension string, data []byte) (*File, error) {
+func NewFile(name string, extension string, data *[]byte) (*File, error) {
 	file := &File{
 		Name:      name,
 		Extension: extension,
-		Data:      bytes.NewBuffer(data),
+		Data:      bytes.NewBuffer(*data),
 	}
 
 	file.Size = int64(file.Data.Len())
@@ -48,24 +50,28 @@ func NewFile(name string, extension string, data []byte) (*File, error) {
 		file.Name = time.Now().Format("2006-01-02T15:04:05")
 	}
 
-	if _, err := file.Validate(); err != nil {
+	if err := file.Validate(); err != nil {
 		return nil, err
 	}
 
 	return file, nil
 }
 
-func (f *File) Validate() (bool, error) {
+func (f *File) Validate() error {
 	_, err := govalidator.ValidateStruct(f)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if f.Size > maxSize {
-		return false, fmt.Errorf("file size exceeded the limit of %d mB", maxSize/(1024*1024))
+		return fmt.Errorf("file size exceeded the limit of %d mB", maxSize/(1024*1024))
 	}
 
-	return true, nil
+	if strings.Contains(f.Name, "../") {
+		return errors.New("file contains invalid ../ path string")
+	}
+
+	return nil
 }
 
 func (f *File) GetName() string        { return f.Name }

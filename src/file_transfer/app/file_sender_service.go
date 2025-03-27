@@ -1,7 +1,8 @@
 package file_transfer
 
 import (
-	"encoding/gob"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -57,7 +58,7 @@ func (s *FileSenderService) listenForMessages() error {
 	return nil
 }
 
-func (s *FileSenderService) getFile(fp string) (domain.FilePort, error) {
+func (s *FileSenderService) getFile(fp string) (FilePort, error) {
 	osFile, err := os.Open(fp)
 	if err != nil {
 		return nil, err
@@ -71,30 +72,32 @@ func (s *FileSenderService) getFile(fp string) (domain.FilePort, error) {
 	}
 	name := fileInfo.Name()
 	extension := filepath.Ext(fp)
+
+	buffer := &bytes.Buffer{}
+	if _, err = io.Copy(buffer, osFile); err != nil {
+		return nil, err
+	}
+	data := buffer.Bytes()
+
 	file, err := domain.NewFile(
 		name[:len(name)-len(extension)],
 		extension,
-		make([]byte, fileInfo.Size()),
+		&data,
 	)
 	if err != nil {
-		return nil, err
-	}
-
-	_, err = io.ReadFull(osFile, file.GetData().Bytes())
-	if err != nil && err != io.EOF {
 		return nil, err
 	}
 
 	return file, nil
 }
 
-func (s *FileSenderService) upload(f domain.FilePort) error {
+func (s *FileSenderService) upload(f FilePort) error {
 	fileContract := struct {
 		Name, Extension string
 		Size            int64
 	}{f.GetName(), f.GetExtension(), f.GetSize()}
 
-	if err := gob.NewEncoder(s.conn).Encode(fileContract); err != nil {
+	if err := json.NewEncoder(s.conn).Encode(fileContract); err != nil {
 		return err
 	}
 

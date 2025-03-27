@@ -3,7 +3,7 @@ package file_transfer
 import "bytes"
 
 type FilePort interface {
-	Validate() (isValid bool, err error)
+	Validate() error
 	GetName() string
 	GetExtension() string
 	GetSize() int64
