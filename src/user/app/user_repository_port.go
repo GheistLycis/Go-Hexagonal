@@ -3,10 +3,10 @@ package user
 import domain "Go-Hexagonal/src/user/domain"
 
 type UserRepoPort interface {
-	Create(user domain.UserPort, createdBy string) (domain.UserPort, error)
-	Get(filters GetUserRepoFiltersDTO) (domain.UserPort, error)
-	List(filters ListUsersRepoFiltersDTO) ([]domain.UserPort, error)
-	Update(user domain.UserPort, updatedBy string) (domain.UserPort, error)
+	Create(user domain.UserPort, createdBy string) (*domain.User, error)
+	Get(filters GetUserRepoFiltersDTO) (*domain.User, error)
+	List(filters ListUsersRepoFiltersDTO) ([]*domain.User, error)
+	Update(user domain.UserPort, updatedBy string) (*domain.User, error)
 }
 
 type GetUserRepoFiltersDTO struct {

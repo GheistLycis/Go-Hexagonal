@@ -30,7 +30,7 @@ type UserModel struct {
 	UpdatedAt *time.Time
 }
 
-func (r *UserRepository) Create(u domain.UserPort, createdBy string) (domain.UserPort, error) {
+func (r *UserRepository) Create(u domain.UserPort, createdBy string) (*domain.User, error) {
 	user := &UserModel{
 		ID:        u.GetID(),
 		Status:    u.GetStatus(),
@@ -56,7 +56,7 @@ func (r *UserRepository) Create(u domain.UserPort, createdBy string) (domain.Use
 	}, nil
 }
 
-func (r *UserRepository) Get(f app.GetUserRepoFiltersDTO) (domain.UserPort, error) {
+func (r *UserRepository) Get(f app.GetUserRepoFiltersDTO) (*domain.User, error) {
 	user := &UserModel{}
 
 	if res := r.conn.First(user, f); res.Error != nil {
@@ -73,14 +73,14 @@ func (r *UserRepository) Get(f app.GetUserRepoFiltersDTO) (domain.UserPort, erro
 	}, nil
 }
 
-func (r *UserRepository) List(f app.ListUsersRepoFiltersDTO) ([]domain.UserPort, error) {
+func (r *UserRepository) List(f app.ListUsersRepoFiltersDTO) ([]*domain.User, error) {
 	users := []UserModel{}
 
 	if res := r.conn.Find(&users); res.Error != nil {
 		return nil, res.Error
 	}
 
-	listUsers := make([]domain.UserPort, len(users))
+	listUsers := make([]*domain.User, len(users))
 
 	for i, user := range users {
 		listUsers[i] = &domain.User{
@@ -96,7 +96,7 @@ func (r *UserRepository) List(f app.ListUsersRepoFiltersDTO) ([]domain.UserPort,
 	return listUsers, nil
 }
 
-func (r *UserRepository) Update(u domain.UserPort, updatedBy string) (domain.UserPort, error) {
+func (r *UserRepository) Update(u domain.UserPort, updatedBy string) (*domain.User, error) {
 	now := time.Now()
 	user := &UserModel{
 		ID:        u.GetID(),

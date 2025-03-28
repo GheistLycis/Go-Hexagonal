@@ -6,11 +6,11 @@ import (
 )
 
 type UserServicePort interface {
-	Create(payload CreateUserServiceDTO, createdBy string) (domain.UserPort, error)
-	Disable(id string, updatedBy string) (domain.UserPort, error)
-	Enable(id string, updatedBy string) (domain.UserPort, error)
-	Get(filters GetUserServiceFiltersDTO) (domain.UserPort, error)
-	List(filters ListUsersServiceFiltersDTO) ([]domain.UserPort, error)
+	Create(payload CreateUserServiceDTO, createdBy string) (*domain.User, error)
+	Disable(id string, updatedBy string) (*domain.User, error)
+	Enable(id string, updatedBy string) (*domain.User, error)
+	Get(filters GetUserServiceFiltersDTO) (*domain.User, error)
+	List(filters ListUsersServiceFiltersDTO) ([]*domain.User, error)
 }
 
 type CreateUserServiceDTO struct {

@@ -10,7 +10,7 @@ func NewUserService(r UserRepoPort) *UserService {
 	return &UserService{repo: r}
 }
 
-func (s *UserService) Create(p CreateUserServiceDTO, createdBy string) (domain.UserPort, error) {
+func (s *UserService) Create(p CreateUserServiceDTO, createdBy string) (*domain.User, error) {
 	user, err := domain.NewUser(p.Name, p.Email, p.Gender, p.BirthDate)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func (s *UserService) Create(p CreateUserServiceDTO, createdBy string) (domain.U
 	return user, nil
 }
 
-func (s *UserService) Disable(id string, updatedBy string) (domain.UserPort, error) {
+func (s *UserService) Disable(id string, updatedBy string) (*domain.User, error) {
 	user, err := s.repo.Get(GetUserRepoFiltersDTO{ID: &id})
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (s *UserService) Disable(id string, updatedBy string) (domain.UserPort, err
 	return user, nil
 }
 
-func (s *UserService) Enable(id string, updatedBy string) (domain.UserPort, error) {
+func (s *UserService) Enable(id string, updatedBy string) (*domain.User, error) {
 	user, err := s.repo.Get(GetUserRepoFiltersDTO{ID: &id})
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (s *UserService) Enable(id string, updatedBy string) (domain.UserPort, erro
 	return user, nil
 }
 
-func (s *UserService) Get(f GetUserServiceFiltersDTO) (domain.UserPort, error) {
+func (s *UserService) Get(f GetUserServiceFiltersDTO) (*domain.User, error) {
 	user, err := s.repo.Get(GetUserRepoFiltersDTO(f))
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (s *UserService) Get(f GetUserServiceFiltersDTO) (domain.UserPort, error) {
 	return user, nil
 }
 
-func (s *UserService) List(f ListUsersServiceFiltersDTO) ([]domain.UserPort, error) {
+func (s *UserService) List(f ListUsersServiceFiltersDTO) ([]*domain.User, error) {
 	users, err := s.repo.List(ListUsersRepoFiltersDTO(f))
 	if err != nil {
 		return nil, err
