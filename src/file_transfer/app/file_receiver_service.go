@@ -17,6 +17,7 @@ import (
 var workDir string
 var outFolder string
 var osSep string
+var ackMsg = "_EOF_ACK_"
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -70,19 +71,22 @@ func (s *FileReceiverService) download(f string) (string, error) {
 	fmt.Print(msg)
 	s.conn.Write([]byte(msg))
 
-	outDir := workDir + osSep + outFolder + osSep + f + osSep
+	outDir := workDir + osSep + outFolder + osSep + f
 	if err := os.MkdirAll(outDir, os.ModePerm); err != nil {
 		return "", err
 	}
-	outPath := outDir + file.Name + file.Extension
+	outPath := outDir + osSep + file.Name + file.Extension
 	osFile, err := os.Create(outPath)
 	if err != nil {
 		return "", err
 	}
-
 	defer osFile.Close()
 
 	if _, err = io.CopyN(osFile, s.conn, file.Size); err != nil {
+		return "", err
+	}
+
+	if _, err := s.conn.Write([]byte(ackMsg)); err != nil {
 		return "", err
 	}
 

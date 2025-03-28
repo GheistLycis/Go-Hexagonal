@@ -15,7 +15,6 @@ func HandleCommands(cmd CommandDTO) {
 	if err != nil {
 		log.Fatalf("Failed to establish connection - %v", err)
 	}
-
 	defer conn.Close()
 
 	app.NewFileSenderService(conn).HandleConnection(cmd.FilePath)

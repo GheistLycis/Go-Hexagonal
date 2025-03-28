@@ -2,6 +2,7 @@ package file_transfer
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -50,8 +51,9 @@ func (s *FileSenderService) listenForMessages() error {
 			}
 			return err
 		}
-
-		fmt.Println(string(buffer[:n]))
+		if msg := string(buffer[:n]); msg != ackMsg {
+			fmt.Println(msg)
+		}
 	}
 
 	return nil
@@ -62,7 +64,6 @@ func (s *FileSenderService) getFile(fp string) (FilePort, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	defer osFile.Close()
 
 	name := filepath.Base(fp)
@@ -98,6 +99,14 @@ func (s *FileSenderService) upload(f FilePort) error {
 
 	if _, err := io.Copy(s.conn, f.GetData()); err != nil {
 		return err
+	}
+
+	ackBuf := make([]byte, len(ackMsg))
+	if _, err := s.conn.Read(ackBuf); err != nil {
+		return err
+	}
+	if string(ackBuf) != ackMsg {
+		return errors.New("failed to receive acknowledgment from receiver")
 	}
 
 	return nil
