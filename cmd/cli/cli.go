@@ -15,7 +15,7 @@ func Init(args []string) {
 		log.Fatalf("Error parsing arg for port - %v", err)
 	}
 
-	cmd := file_transfer.CommandsDTO{
+	cmd := file_transfer.CommandDTO{
 		Address:  args[0],
 		Port:     int32(port),
 		FilePath: args[2],
