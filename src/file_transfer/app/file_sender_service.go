@@ -66,13 +66,8 @@ func (s *FileSenderService) getFile(fp string) (FilePort, error) {
 
 	defer osFile.Close()
 
-	fileInfo, err := osFile.Stat()
-	if err != nil {
-		return nil, err
-	}
-	name := fileInfo.Name()
+	name := filepath.Base(fp)
 	extension := filepath.Ext(fp)
-
 	buffer := &bytes.Buffer{}
 	if _, err = io.Copy(buffer, osFile); err != nil {
 		return nil, err

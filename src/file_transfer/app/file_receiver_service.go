@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"strconv"
 	"strings"
 
 	domain "Go-Hexagonal/src/file_transfer/domain"
@@ -18,7 +17,6 @@ import (
 var workDir string
 var outFolder string
 var osSep string
-var maxBufferSize int64
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -34,12 +32,6 @@ func init() {
 	outFolder = os.Getenv("FT_OUT_DIR")
 
 	osSep = string(os.PathSeparator)
-
-	maxBufferSizeMb, err := strconv.ParseFloat(os.Getenv("FT_BUFF_MB"), 64)
-	if err != nil {
-		log.Fatalf("Failed to parse ENV variable FT_BUFF_MB - %v", err)
-	}
-	maxBufferSize = int64(maxBufferSizeMb * 1024 * 1024)
 }
 
 type FileReceiverService struct {
@@ -83,7 +75,7 @@ func (s *FileReceiverService) download(f string) (string, error) {
 		return "", err
 	}
 	outPath := outDir + file.Name + file.Extension
-	osFile, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	osFile, err := os.Create(outPath)
 	if err != nil {
 		return "", err
 	}

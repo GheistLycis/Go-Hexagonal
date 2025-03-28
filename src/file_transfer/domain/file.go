@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -39,7 +40,7 @@ type File struct {
 
 func NewFile(name string, extension string, data *[]byte) (*File, error) {
 	file := &File{
-		Name:      name,
+		Name:      filepath.Clean(name),
 		Extension: extension,
 		Data:      bytes.NewBuffer(*data),
 	}
@@ -67,8 +68,11 @@ func (f *File) Validate() error {
 		return fmt.Errorf("file size exceeded the limit of %d mB", maxSize/(1024*1024))
 	}
 
-	if strings.Contains(f.Name, "../") {
-		return errors.New("file contains invalid ../ path string")
+	if filepath.IsAbs(f.Name) ||
+		strings.Contains(f.Name, "..") ||
+		strings.Contains(f.Name, "~") ||
+		strings.Contains(f.Name, ":") {
+		return errors.New("file contains invalid path string")
 	}
 
 	return nil
