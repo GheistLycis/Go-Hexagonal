@@ -48,13 +48,11 @@ func HandleServer(l net.Listener) {
 		defer shutConnection(conn, peerIp)
 
 		if peerIsTrusted(peerIp) {
-			fmt.Printf("\nStablished connection with %s", peerIp)
-			conn.Write([]byte("\nConnection stablished"))
+			fmt.Printf("\nEstablished connection with %s", peerIp)
 			conn.SetReadDeadline(time.Now().Add(timeOut * time.Minute))
 			go app.NewFileReceiverService(conn).HandleConnection()
 		} else {
 			fmt.Printf("\nDenied connection with %s", peerIp)
-			conn.Write([]byte("\nConnection refused"))
 			return
 		}
 	}
@@ -66,6 +64,5 @@ func peerIsTrusted(ip string) bool {
 
 func shutConnection(c net.Conn, ip string) {
 	fmt.Printf("\nClosing connection with %s", ip)
-	c.Write([]byte("\nClosing connection"))
 	c.Close()
 }
