@@ -1,6 +1,6 @@
 # Go-Hexagonal
 
-Go-based implementation of the Hexagonal Architecture (Ports and Adapters), featuring both a HTTP server and a TCP server for P2P file transfers.
+Go-based implementation of the Hexagonal Architecture (Ports and Adapters), featuring both a HTTP server and a TCP server/client for P2P file transfers.
 
 -   Web server implemented with Gin
 -   Database handling with GORM and PostgreSQL
@@ -43,7 +43,7 @@ Create two types in your database, user_gender and user_status, as described in 
 Start the HTTP server with:
 
 ```sh
-./scripts/run.sh
+./scripts/web.sh
 ```
 
 Access it at `http://localhost:<WEB_PORT>`
@@ -55,7 +55,7 @@ Access it at `http://localhost:<WEB_PORT>`
 Start the TCP server to receive files with:
 
 ```sh
-./scripts/run.sh tcp
+./scripts/tcp.sh
 ```
 
 ### CLI
@@ -65,7 +65,7 @@ Start the TCP server to receive files with:
 Start the CLI to send files to the TCP server with:
 
 ```sh
-./scripts/run.sh cli <ADDRESS> <PORT> <FILE_PATH>
+./scripts/cli.sh <ADDRESS> <PORT> <FILE_PATH>
 ```
 
 Or, if you're running the compiled app:
