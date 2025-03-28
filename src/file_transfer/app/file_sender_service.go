@@ -1,7 +1,6 @@
 package file_transfer
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -68,18 +67,19 @@ func (s *FileSenderService) getFile(fp string) (FilePort, error) {
 
 	name := filepath.Base(fp)
 	extension := filepath.Ext(fp)
-	buffer := &bytes.Buffer{}
-	if _, err = io.Copy(buffer, osFile); err != nil {
-		return nil, err
-	}
-	data := buffer.Bytes()
-
 	file, err := domain.NewFile(
 		name[:len(name)-len(extension)],
 		extension,
-		&data,
+		&[]byte{},
 	)
 	if err != nil {
+		return nil, err
+	}
+	if _, err = io.Copy(file.Data, osFile); err != nil {
+		return nil, err
+	}
+	file.Size = int64(file.Data.Len())
+	if err = file.Validate(); err != nil {
 		return nil, err
 	}
 
