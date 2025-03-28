@@ -66,32 +66,31 @@ func NewUser(name string, email string, gender Gender, BirthDate time.Time) (*Us
 		BirthDate: BirthDate,
 	}
 
-	if _, err := user.Validate(); err != nil {
+	if err := user.Validate(); err != nil {
 		return nil, err
 	}
 
 	return user, nil
 }
 
-func (u *User) Validate() (bool, error) {
-	_, err := govalidator.ValidateStruct(u)
-	if err != nil {
-		return false, err
+func (u *User) Validate() error {
+	if _, err := govalidator.ValidateStruct(u); err != nil {
+		return err
 	}
 
 	if u.Name == "" {
-		return false, errors.New("o nome não pode ser vazio")
+		return errors.New("o nome não pode ser vazio")
 	}
 
 	if u.Status != ENABLED && u.Status != DISABLED && u.Status != IN_ANALYSIS {
-		return false, fmt.Errorf("status inválido: %s", u.Status)
+		return fmt.Errorf("status inválido: %s", u.Status)
 	}
 
 	if u.Gender != MALE && u.Gender != FEMALE && u.Gender != OTHER {
-		return false, fmt.Errorf("gênero inválido: %s", u.Gender)
+		return fmt.Errorf("gênero inválido: %s", u.Gender)
 	}
 
-	return true, nil
+	return nil
 }
 
 func (u *User) Enable() error {
@@ -101,9 +100,7 @@ func (u *User) Enable() error {
 
 	u.Status = ENABLED
 
-	_, err := u.Validate()
-
-	return err
+	return u.Validate()
 }
 
 func (u *User) Disable() error {
@@ -113,9 +110,7 @@ func (u *User) Disable() error {
 
 	u.Status = DISABLED
 
-	_, err := u.Validate()
-
-	return err
+	return u.Validate()
 }
 
 func (u *User) GetID() string           { return u.ID }

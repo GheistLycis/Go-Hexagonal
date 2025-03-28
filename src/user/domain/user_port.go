@@ -3,7 +3,7 @@ package user
 import "time"
 
 type UserPort interface {
-	Validate() (isValid bool, err error)
+	Validate() error
 	Enable() error
 	Disable() error
 	GetID() string

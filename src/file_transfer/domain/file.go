@@ -55,8 +55,7 @@ func NewFile(name string, extension string, size int64) (*File, error) {
 }
 
 func (f *File) Validate() error {
-	_, err := govalidator.ValidateStruct(f)
-	if err != nil {
+	if _, err := govalidator.ValidateStruct(f); err != nil {
 		return err
 	}
 
