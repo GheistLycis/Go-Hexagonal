@@ -2,8 +2,6 @@ package file_transfer
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -12,8 +10,6 @@ import (
 
 	domain "Go-Hexagonal/src/file_transfer/domain"
 )
-
-var msgMaxSize = 100 * 1024
 
 type FileSenderService struct {
 	conn net.Conn
@@ -26,88 +22,69 @@ func NewFileSenderService(c net.Conn) *FileSenderService { // TODO: use generic 
 }
 
 func (s *FileSenderService) HandleConnection(fp string) {
-	go s.listenForMessages()
-
-	file, err := s.getFile(fp)
+	file, osFile, err := s.getFile(fp)
 	if err != nil {
 		log.Fatalf("Error reading file - %v", err)
 		return
 	}
 
-	if err := s.upload(file); err != nil {
+	if err := s.upload(file, osFile); err != nil {
 		log.Fatalf("Error sending file - %v", err)
 		return
 	}
+
+	s.waitForConfirmation()
 }
 
-func (s *FileSenderService) listenForMessages() error {
-	buffer := make([]byte, msgMaxSize)
-
-	for {
-		n, err := s.conn.Read(buffer)
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
-		}
-		if msg := string(buffer[:n]); msg != ackMsg {
-			fmt.Println(msg)
-		}
-	}
-
-	return nil
-}
-
-func (s *FileSenderService) getFile(fp string) (FilePort, error) {
+func (s *FileSenderService) getFile(fp string) (FilePort, *os.File, error) {
 	osFile, err := os.Open(fp)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	defer osFile.Close()
+	defer func() {
+		if err != nil {
+			osFile.Close()
+		}
+	}()
 
-	name := filepath.Base(fp)
+	fileInfo, err := osFile.Stat()
+	if err != nil {
+		return nil, nil, err
+	}
+	name := fileInfo.Name()
 	extension := filepath.Ext(fp)
 	file, err := domain.NewFile(
 		name[:len(name)-len(extension)],
 		extension,
-		&[]byte{},
+		fileInfo.Size(),
 	)
 	if err != nil {
-		return nil, err
-	}
-	if _, err = io.Copy(file.Data, osFile); err != nil {
-		return nil, err
-	}
-	file.Size = int64(file.Data.Len())
-	if err = file.Validate(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return file, nil
+	return file, osFile, nil
 }
 
-func (s *FileSenderService) upload(f FilePort) error {
-	fileContract := struct {
-		Name, Extension string
-		Size            int64
-	}{f.GetName(), f.GetExtension(), f.GetSize()}
+func (s *FileSenderService) upload(f FilePort, osF *os.File) error {
+	defer osF.Close()
 
-	if err := json.NewEncoder(s.conn).Encode(fileContract); err != nil {
+	if err := json.NewEncoder(s.conn).Encode(f); err != nil {
 		return err
 	}
 
-	if _, err := io.Copy(s.conn, f.GetData()); err != nil {
+	if _, err := io.Copy(s.conn, osF); err != nil {
 		return err
-	}
-
-	ackBuf := make([]byte, len(ackMsg))
-	if _, err := s.conn.Read(ackBuf); err != nil {
-		return err
-	}
-	if string(ackBuf) != ackMsg {
-		return errors.New("failed to receive acknowledgment from receiver")
 	}
 
 	return nil
+}
+
+func (s *FileSenderService) waitForConfirmation() {
+	buffer := make([]byte, len(ackMsg))
+	if _, err := s.conn.Read(buffer); err != nil {
+		log.Fatal(err.Error())
+	}
+	if string(buffer) != ackMsg {
+		log.Fatal("failed to receive download confirmation from receiver")
+	}
 }

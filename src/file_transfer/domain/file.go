@@ -1,7 +1,6 @@
 package file_transfer
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"log"
@@ -32,20 +31,17 @@ func init() {
 }
 
 type File struct {
-	Name      string        `valid:"-"`
-	Extension string        `valid:"-"`
-	Size      int64         `valid:"-"`
-	Data      *bytes.Buffer `valid:"-"`
+	Name      string `valid:"-"`
+	Extension string `valid:"-"`
+	Size      int64  `valid:"-"`
 }
 
-func NewFile(name string, extension string, data *[]byte) (*File, error) {
+func NewFile(name string, extension string, size int64) (*File, error) {
 	file := &File{
 		Name:      filepath.Clean(name),
 		Extension: extension,
-		Data:      bytes.NewBuffer(*data),
+		Size:      size,
 	}
-
-	file.Size = int64(file.Data.Len())
 
 	if name == "" {
 		file.Name = time.Now().Format("2006-01-02T15:04:05")
@@ -78,7 +74,6 @@ func (f *File) Validate() error {
 	return nil
 }
 
-func (f *File) GetName() string        { return f.Name }
-func (f *File) GetExtension() string   { return f.Extension }
-func (f *File) GetSize() int64         { return f.Size }
-func (f *File) GetData() *bytes.Buffer { return f.Data }
+func (f *File) GetName() string      { return f.Name }
+func (f *File) GetExtension() string { return f.Extension }
+func (f *File) GetSize() int64       { return f.Size }

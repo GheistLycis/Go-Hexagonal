@@ -14,10 +14,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const ackMsg string = "_EOF_ACK_"
+
 var workDir string
 var outFolder string
 var osSep string
-var ackMsg = "_EOF_ACK_"
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -51,12 +52,10 @@ func (s *FileReceiverService) HandleConnection() {
 	outPath, err := s.download(s.peerIp)
 	if err != nil {
 		fmt.Printf("\n(%s) Error downloading content: %v", s.peerIp, err)
-		s.conn.Write([]byte("\nError downloading content"))
 		return
 	}
 
 	fmt.Printf("\n(%s) Content downloaded sucessfully (%s)", s.peerIp, outPath)
-	s.conn.Write([]byte("\nContent downloaded sucessfully"))
 }
 
 func (s *FileReceiverService) download(f string) (string, error) {
@@ -67,9 +66,7 @@ func (s *FileReceiverService) download(f string) (string, error) {
 	if err := file.Validate(); err != nil {
 		return "", err
 	}
-	msg := fmt.Sprintf("\nReceiving %s (%d mB)...", file.Name+file.Extension, file.Size/(1024*1024))
-	fmt.Print(msg)
-	s.conn.Write([]byte(msg))
+	fmt.Printf("\nReceiving %s (%d mB)...", file.Name+file.Extension, file.Size/(1024*1024))
 
 	outDir := workDir + osSep + outFolder + osSep + f
 	if err := os.MkdirAll(outDir, os.ModePerm); err != nil {
