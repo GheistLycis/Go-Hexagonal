@@ -36,7 +36,7 @@ func (s *FileSenderService) HandleConnection(fp string) {
 	s.waitForConfirmation()
 }
 
-func (s *FileSenderService) getFile(fp string) (FilePort, *os.File, error) {
+func (s *FileSenderService) getFile(fp string) (domain.FilePort, *os.File, error) {
 	osFile, err := os.Open(fp)
 	if err != nil {
 		return nil, nil, err
@@ -65,7 +65,7 @@ func (s *FileSenderService) getFile(fp string) (FilePort, *os.File, error) {
 	return file, osFile, nil
 }
 
-func (s *FileSenderService) upload(f FilePort, osF *os.File) error {
+func (s *FileSenderService) upload(f domain.FilePort, osF *os.File) error {
 	defer osF.Close()
 
 	if err := json.NewEncoder(s.conn).Encode(f); err != nil {

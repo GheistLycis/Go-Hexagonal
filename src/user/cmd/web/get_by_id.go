@@ -1,7 +1,6 @@
 package user
 
 import (
-	app "Go-Hexagonal/src/user/app"
 	domain "Go-Hexagonal/src/user/domain"
 	"net/http"
 	"time"
@@ -9,22 +8,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func getById(c *gin.Context, s app.UserServicePort) {
+func getById(c *gin.Context, s domain.UserServicePort) {
 	id := c.Param("id")
 
-	user, err := s.Get(app.GetUserServiceFiltersDTO{ID: &id})
+	user, err := s.Get(domain.GetUserServiceFiltersDTO{ID: &id})
 	if err != nil {
 		c.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 
 	res := getUserByIdRes{
-		ID:        user.GetID(),
-		Status:    user.GetStatus(),
-		Name:      user.GetName(),
-		Email:     user.GetEmail(),
-		Gender:    user.GetGender(),
-		BirthDate: user.GetBirthDate(),
+		ID:        user.ID,
+		Status:    user.Status,
+		Name:      user.Name,
+		Email:     user.Email,
+		Gender:    user.Gender,
+		BirthDate: user.BirthDate,
 	}
 
 	c.JSON(http.StatusOK, res)

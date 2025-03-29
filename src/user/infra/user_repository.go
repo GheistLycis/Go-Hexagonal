@@ -1,7 +1,6 @@
 package user
 
 import (
-	app "Go-Hexagonal/src/user/app"
 	domain "Go-Hexagonal/src/user/domain"
 	"time"
 
@@ -14,20 +13,6 @@ type UserRepository struct {
 
 func NewUserRepo(c *gorm.DB) *UserRepository { // TODO: use generic interface for DB adapter
 	return &UserRepository{conn: c}
-}
-
-type UserModel struct {
-	gorm.Model
-	ID        string        `gorm:"primaryKey"`
-	Status    domain.Status `gorm:"type:user_status"`
-	Name      string
-	Email     string        `gorm:"unique"`
-	Gender    domain.Gender `gorm:"type:user_gender"`
-	BirthDate time.Time
-	CreatedBy string
-	CreatedAt time.Time
-	UpdatedBy *string
-	UpdatedAt *time.Time
 }
 
 func (r *UserRepository) Create(u domain.UserPort, createdBy string) (*domain.User, error) {
@@ -56,7 +41,7 @@ func (r *UserRepository) Create(u domain.UserPort, createdBy string) (*domain.Us
 	}, nil
 }
 
-func (r *UserRepository) Get(f app.GetUserRepoFiltersDTO) (*domain.User, error) {
+func (r *UserRepository) Get(f domain.GetUserRepoFiltersDTO) (*domain.User, error) {
 	user := &UserModel{}
 
 	if res := r.conn.First(user, f); res.Error != nil {
@@ -73,7 +58,7 @@ func (r *UserRepository) Get(f app.GetUserRepoFiltersDTO) (*domain.User, error) 
 	}, nil
 }
 
-func (r *UserRepository) List(f app.ListUsersRepoFiltersDTO) ([]*domain.User, error) {
+func (r *UserRepository) List(f domain.ListUsersRepoFiltersDTO) ([]*domain.User, error) {
 	users := []UserModel{}
 
 	if res := r.conn.Find(&users); res.Error != nil {

@@ -3,14 +3,14 @@ package user
 import domain "Go-Hexagonal/src/user/domain"
 
 type UserService struct {
-	repo UserRepoPort
+	repo domain.UserRepoPort
 }
 
-func NewUserService(r UserRepoPort) *UserService {
+func NewUserService(r domain.UserRepoPort) *UserService {
 	return &UserService{repo: r}
 }
 
-func (s *UserService) Create(p CreateUserServiceDTO, createdBy string) (*domain.User, error) {
+func (s *UserService) Create(p domain.CreateUserServiceDTO, createdBy string) (*domain.User, error) {
 	user, err := domain.NewUser(p.Name, p.Email, p.Gender, p.BirthDate)
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func (s *UserService) Create(p CreateUserServiceDTO, createdBy string) (*domain.
 }
 
 func (s *UserService) Disable(id string, updatedBy string) (*domain.User, error) {
-	user, err := s.repo.Get(GetUserRepoFiltersDTO{ID: &id})
+	user, err := s.repo.Get(domain.GetUserRepoFiltersDTO{ID: &id})
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (s *UserService) Disable(id string, updatedBy string) (*domain.User, error)
 }
 
 func (s *UserService) Enable(id string, updatedBy string) (*domain.User, error) {
-	user, err := s.repo.Get(GetUserRepoFiltersDTO{ID: &id})
+	user, err := s.repo.Get(domain.GetUserRepoFiltersDTO{ID: &id})
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +57,8 @@ func (s *UserService) Enable(id string, updatedBy string) (*domain.User, error) 
 	return user, nil
 }
 
-func (s *UserService) Get(f GetUserServiceFiltersDTO) (*domain.User, error) {
-	user, err := s.repo.Get(GetUserRepoFiltersDTO(f))
+func (s *UserService) Get(f domain.GetUserServiceFiltersDTO) (*domain.User, error) {
+	user, err := s.repo.Get(domain.GetUserRepoFiltersDTO(f))
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +66,8 @@ func (s *UserService) Get(f GetUserServiceFiltersDTO) (*domain.User, error) {
 	return user, nil
 }
 
-func (s *UserService) List(f ListUsersServiceFiltersDTO) ([]*domain.User, error) {
-	users, err := s.repo.List(ListUsersRepoFiltersDTO(f))
+func (s *UserService) List(f domain.ListUsersServiceFiltersDTO) ([]*domain.User, error) {
+	users, err := s.repo.List(domain.ListUsersRepoFiltersDTO(f))
 	if err != nil {
 		return nil, err
 	}

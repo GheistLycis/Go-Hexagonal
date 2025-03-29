@@ -2,6 +2,7 @@ package user
 
 import (
 	app "Go-Hexagonal/src/user/app"
+	domain "Go-Hexagonal/src/user/domain"
 	infra "Go-Hexagonal/src/user/infra"
 
 	"github.com/gin-gonic/gin"
@@ -25,10 +26,10 @@ func SetRouter(g *gin.Engine, DB *gorm.DB) {
 	g.POST("user/:id/disable", handle(disable, service))
 }
 
-func handle(m method, s app.UserServicePort) gin.HandlerFunc { // TODO: implement auth service
+func handle(m method, s domain.UserServicePort) gin.HandlerFunc { // TODO: implement auth service
 	return func(c *gin.Context) {
 		m(c, s)
 	}
 }
 
-type method func(c *gin.Context, s app.UserServicePort)
+type method func(c *gin.Context, s domain.UserServicePort)
