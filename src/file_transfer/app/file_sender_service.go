@@ -22,13 +22,13 @@ func NewFileSenderService(c net.Conn) *FileSenderService { // TODO: use generic 
 }
 
 func (s *FileSenderService) HandleConnection(fp string) {
-	file, osFile, err := s.getFile(fp)
+	file, err := s.getFile(fp)
 	if err != nil {
 		log.Fatalf("Error reading file - %v", err)
 		return
 	}
 
-	if err := s.upload(file, osFile); err != nil {
+	if err := s.upload(file); err != nil {
 		log.Fatalf("Error sending file - %v", err)
 		return
 	}
@@ -36,10 +36,10 @@ func (s *FileSenderService) HandleConnection(fp string) {
 	s.waitForConfirmation()
 }
 
-func (s *FileSenderService) getFile(fp string) (domain.FilePort, *os.File, error) {
+func (s *FileSenderService) getFile(fp string) (domain.FilePort, error) {
 	osFile, err := os.Open(fp)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	defer func() {
 		if err != nil {
@@ -49,7 +49,7 @@ func (s *FileSenderService) getFile(fp string) (domain.FilePort, *os.File, error
 
 	fileInfo, err := osFile.Stat()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	name := fileInfo.Name()
 	extension := filepath.Ext(fp)
@@ -57,22 +57,23 @@ func (s *FileSenderService) getFile(fp string) (domain.FilePort, *os.File, error
 		name[:len(name)-len(extension)],
 		extension,
 		fileInfo.Size(),
+		osFile,
 	)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return file, osFile, nil
+	return file, nil
 }
 
-func (s *FileSenderService) upload(f domain.FilePort, osF *os.File) error {
-	defer osF.Close()
+func (s *FileSenderService) upload(f domain.FilePort) error {
+	defer f.GetPointer().Close()
 
 	if err := json.NewEncoder(s.conn).Encode(f); err != nil {
 		return err
 	}
 
-	if _, err := io.Copy(s.conn, osF); err != nil {
+	if _, err := io.Copy(s.conn, f.GetPointer()); err != nil {
 		return err
 	}
 
