@@ -49,8 +49,15 @@ func NewFileReceiverService(c net.Conn) *FileReceiverService { // TODO: use gene
 }
 
 func (s *FileReceiverService) HandleConnection() {
-	outPath, err := s.download(s.peerIp)
+	file, outPath, err := s.createFile(s.peerIp)
 	if err != nil {
+		fmt.Printf("\n(%s) Error creating destiny file: %v", s.peerIp, err)
+		return
+	}
+
+	fmt.Printf("\nReceiving %s (%d mB)...", file.Name+file.Extension, file.Size/(1024*1024))
+
+	if err = s.download(file); err != nil {
 		fmt.Printf("\n(%s) Error downloading content: %v", s.peerIp, err)
 		return
 	}
@@ -58,34 +65,40 @@ func (s *FileReceiverService) HandleConnection() {
 	fmt.Printf("\n(%s) Content downloaded sucessfully (%s)", s.peerIp, outPath)
 }
 
-func (s *FileReceiverService) download(f string) (string, error) {
+func (s *FileReceiverService) createFile(f string) (*domain.File, string, error) {
 	var file domain.File
 	if err := json.NewDecoder(s.conn).Decode(&file); err != nil {
-		return "", err
+		return nil, "", err
 	}
 	if err := file.Validate(); err != nil {
-		return "", err
+		return nil, "", err
 	}
-	fmt.Printf("\nReceiving %s (%d mB)...", file.Name+file.Extension, file.Size/(1024*1024))
 
 	outDir := workDir + osSep + outFolder + osSep + f
 	if err := os.MkdirAll(outDir, os.ModePerm); err != nil {
-		return "", err
+		return nil, "", err
 	}
 	outPath := outDir + osSep + file.Name + file.Extension
 	osFile, err := os.Create(outPath)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
-	defer osFile.Close()
 
-	if _, err = io.CopyN(osFile, s.conn, file.Size); err != nil {
-		return "", err
+	file.Reference = osFile
+
+	return &file, outPath, nil
+}
+
+func (s *FileReceiverService) download(f domain.FilePort) error {
+	defer f.GetReference().Close()
+
+	if _, err := io.CopyN(f.GetReference(), s.conn, f.GetSize()); err != nil {
+		return err
 	}
 
 	if _, err := s.conn.Write([]byte(ackMsg)); err != nil {
-		return "", err
+		return err
 	}
 
-	return outPath, nil
+	return nil
 }

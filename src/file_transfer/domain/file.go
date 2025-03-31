@@ -34,15 +34,15 @@ type File struct {
 	Name      string   `valid:"-"`
 	Extension string   `valid:"-"`
 	Size      int64    `valid:"-"`
-	Pointer   *os.File `valid:"-"`
+	Reference *os.File `valid:"-"`
 }
 
-func NewFile(name string, extension string, size int64, pointer *os.File) (*File, error) {
+func NewFile(name string, extension string, size int64, reference *os.File) (*File, error) {
 	file := &File{
 		Name:      filepath.Clean(name),
 		Extension: extension,
 		Size:      size,
-		Pointer:   pointer,
+		Reference: reference,
 	}
 
 	if name == "" {
@@ -62,7 +62,7 @@ func (f *File) Validate() error {
 	}
 
 	if f.Size > maxSize {
-		return fmt.Errorf("file size exceeded the limit of %d mB", maxSize/(1024*1024))
+		return fmt.Errorf("file size exceeds the limit of %d mB", maxSize/(1024*1024))
 	}
 
 	if filepath.IsAbs(f.Name) ||
@@ -75,7 +75,7 @@ func (f *File) Validate() error {
 	return nil
 }
 
-func (f *File) GetName() string      { return f.Name }
-func (f *File) GetExtension() string { return f.Extension }
-func (f *File) GetSize() int64       { return f.Size }
-func (f *File) GetPointer() *os.File { return f.Pointer }
+func (f *File) GetName() string        { return f.Name }
+func (f *File) GetExtension() string   { return f.Extension }
+func (f *File) GetSize() int64         { return f.Size }
+func (f *File) GetReference() *os.File { return f.Reference }

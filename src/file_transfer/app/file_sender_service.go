@@ -67,13 +67,13 @@ func (s *FileSenderService) getFile(fp string) (domain.FilePort, error) {
 }
 
 func (s *FileSenderService) upload(f domain.FilePort) error {
-	defer f.GetPointer().Close()
+	defer f.GetReference().Close()
 
 	if err := json.NewEncoder(s.conn).Encode(f); err != nil {
 		return err
 	}
 
-	if _, err := io.Copy(s.conn, f.GetPointer()); err != nil {
+	if _, err := io.Copy(s.conn, f.GetReference()); err != nil {
 		return err
 	}
 

@@ -7,5 +7,5 @@ type FilePort interface {
 	GetName() string
 	GetExtension() string
 	GetSize() int64
-	GetPointer() *os.File
+	GetReference() *os.File
 }
