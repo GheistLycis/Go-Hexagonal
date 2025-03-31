@@ -22,40 +22,6 @@ type User struct {
 	BirthDate time.Time `valid:"-"`
 }
 
-/*
-const (
-
-	ENABLED     Status = "ATIVO"
-	IN_ANALYSIS Status = "EM ANÁLISE"
-	DISABLED    Status = "INATIVO"
-
-)
-*/
-type Status string
-
-const (
-	ENABLED     Status = "ATIVO"
-	IN_ANALYSIS Status = "EM ANÁLISE"
-	DISABLED    Status = "INATIVO"
-)
-
-/*
-const (
-
-	MALE   Gender = "MASCULINO"
-	FEMALE Gender = "FEMININO"
-	OTHER  Gender = "OUTRO"
-
-)
-*/
-type Gender string
-
-const (
-	MALE   Gender = "MASCULINO"
-	FEMALE Gender = "FEMININO"
-	OTHER  Gender = "OUTRO"
-)
-
 func NewUser(name string, email string, gender Gender, BirthDate time.Time) (*User, error) {
 	user := &User{
 		ID:        uuid.NewV4().String(),
