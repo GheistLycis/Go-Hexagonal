@@ -15,7 +15,7 @@ type FileSenderService struct {
 	conn net.Conn
 }
 
-func NewFileSenderService(c net.Conn) *FileSenderService { // TODO: use generic interface for connection adapter
+func NewFileSenderService(c net.Conn) *FileSenderService {
 	return &FileSenderService{
 		conn: c,
 	}
