@@ -36,7 +36,7 @@ To compile:
 
 -   PostgreSQL (>= 16)
 
-Create two types in your database, user_gender and user_status, as described in `src/user/domain/user.go`.
+Create two types in your database, user_gender and user_status, as described in `src/user/infra/user_model.go`.
 
 #### Usage
 

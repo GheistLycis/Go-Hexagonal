@@ -1,0 +1,29 @@
+services:
+    database:
+        container_name: go_hexagonal_db
+        build:
+            context: infra/postgres
+        environment:
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_DB: ${DB_NAME}
+        ports:
+            - '${DB_PORT}:5432'
+        volumes:
+            - postgres:/var/lib/postgresql/data
+        networks:
+            - shared
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+            retries: 5
+            interval: 5s
+            timeout: 2s
+            start_period: 5s
+
+networks:
+    shared:
+        driver: bridge
+
+volumes:
+    postgres:
+        driver: local

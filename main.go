@@ -4,7 +4,7 @@ import (
 	cli "Go-Hexagonal/cmd/cli"
 	tcp "Go-Hexagonal/cmd/tcp"
 	web "Go-Hexagonal/cmd/web"
-	db "Go-Hexagonal/infra/db"
+	postgres "Go-Hexagonal/infra/postgres"
 	"log"
 	"os"
 )
@@ -25,7 +25,7 @@ func main() {
 	switch entry {
 	case "web":
 		log.Print("RUNNING WEB SERVER")
-		web.Init(db.Init())
+		web.Init(postgres.Init())
 	case "cli":
 		log.Print("RUNNING CLI PROGRAM")
 		cli.Init(args)
