@@ -2,7 +2,6 @@ package user
 
 import (
 	domain "Go-Hexagonal/src/user/domain"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -24,7 +23,6 @@ func (r *UserRepository) Create(u domain.UserPort, createdBy string) (*domain.Us
 		Gender:    u.GetGender(),
 		BirthDate: u.GetBirthDate(),
 		CreatedBy: createdBy,
-		CreatedAt: time.Now(),
 	}
 
 	if res := r.conn.Create(&user); res.Error != nil {
@@ -82,7 +80,6 @@ func (r *UserRepository) List(f domain.ListUsersRepoFiltersDTO) ([]*domain.User,
 }
 
 func (r *UserRepository) Update(u domain.UserPort, updatedBy string) (*domain.User, error) {
-	now := time.Now()
 	user := &UserModel{
 		ID:        u.GetID(),
 		Status:    u.GetStatus(),
@@ -91,7 +88,6 @@ func (r *UserRepository) Update(u domain.UserPort, updatedBy string) (*domain.Us
 		Gender:    u.GetGender(),
 		BirthDate: u.GetBirthDate(),
 		UpdatedBy: &updatedBy,
-		UpdatedAt: &now,
 	}
 
 	if res := r.conn.Updates(&user); res.Error != nil {

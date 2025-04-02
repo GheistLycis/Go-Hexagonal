@@ -1,12 +1,16 @@
 package user
 
-import "time"
+import (
+	"time"
+
+	uuid "github.com/satori/go.uuid"
+)
 
 type UserPort interface {
 	Validate() error
 	Enable() error
 	Disable() error
-	GetID() string
+	GetID() uuid.UUID
 	GetStatus() Status
 	GetBirthDate() time.Time
 	GetName() string

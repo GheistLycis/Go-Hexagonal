@@ -5,7 +5,7 @@ OUTPUT=${2:-"main"}
 OS=${3:-$(go env GOOS)}
 ARCH=${4:-$(go env GOARCH)}
 
-echo "Compiling $CMD for $OS/$ARCH into /bin/$OUTPUT..."
+echo "Compiling $CMD for $OS/$ARCH into bin/$OUTPUT..."
 
 GOOS=$OS GOARCH=$ARCH \
     go build \

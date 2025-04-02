@@ -4,19 +4,22 @@ import (
 	domain "Go-Hexagonal/src/user/domain"
 	"time"
 
+	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 )
 
 type UserModel struct {
 	gorm.Model
-	ID        string        `gorm:"primaryKey"`
+	ID        uuid.UUID     `gorm:"type:uuid;default:gen_random_uuid()"`
 	Status    domain.Status `gorm:"type:user_status"`
 	Name      string
 	Email     string        `gorm:"unique"`
 	Gender    domain.Gender `gorm:"type:user_gender"`
 	BirthDate time.Time
 	CreatedBy string
-	CreatedAt time.Time
 	UpdatedBy *string
-	UpdatedAt *time.Time
+}
+
+func (UserModel) TableName() string {
+	return "user"
 }

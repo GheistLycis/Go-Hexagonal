@@ -1,14 +1,36 @@
 services:
+    web:
+        container_name: go_hexagonal_web
+        build:
+            dockerfile: cmd/web/Dockerfile
+        environment:
+            WEB_PORT: ${WEB_PORT}
+            DB_AUTO_MIGRATE: ${DB_AUTO_MIGRATE}
+            DB_HOST: database
+            DB_NAME: ${DB_NAME}
+            DB_PASSWORD: ${DB_PASSWORD}
+            DB_PORT: 5432
+            DB_USER: ${DB_USER}
+        ports:
+            - '${WEB_PORT}:${WEB_PORT}'
+        volumes:
+            - postgres:/var/lib/postgresql/data
+        networks:
+            - shared
+        depends_on:
+            database:
+                condition: service_healthy
+
     database:
         container_name: go_hexagonal_db
         build:
-            context: infra/postgres
+            dockerfile: infra/postgres/Dockerfile
         environment:
             POSTGRES_USER: ${DB_USER}
             POSTGRES_PASSWORD: ${DB_PASSWORD}
             POSTGRES_DB: ${DB_NAME}
         ports:
-            - '${DB_PORT}:5432'
+            - '${DB_PORT:-5432}:5432'
         volumes:
             - postgres:/var/lib/postgresql/data
         networks:

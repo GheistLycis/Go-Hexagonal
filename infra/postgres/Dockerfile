@@ -1,13 +1,10 @@
 FROM postgres:16
 
-ARG PORT
+COPY infra/postgres/init.sh /docker-entrypoint-initdb.d/
+COPY infra/postgres/queries/ /queries/
 
-EXPOSE ${PORT}
-
-COPY init.sh /docker-entrypoint-initdb.d/
-COPY queries/ /queries/
-
-RUN apt-get update && apt-get install -y postgresql-client
+RUN apt-get update 
+RUN apt-get install -y postgresql-client
 RUN chmod +x /docker-entrypoint-initdb.d/init.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
