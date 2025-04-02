@@ -4,18 +4,16 @@ WORKDIR /app
 
 COPY .env .
 COPY scripts/build.sh .
+COPY src/ src/
 COPY cmd/ cmd/
 COPY infra/ infra/
-COPY src/ src/
 COPY main.go .
 
 RUN apt-get -y update
 RUN go mod init Go-Hexagonal
 RUN go mod tidy
 RUN chmod +x ./build.sh
-RUN ./build.sh web main
-
-ENTRYPOINT ["bin/main"]
+RUN ./build.sh cli main
 
 
 # TODO: fix "exec ./main: no such file or directory"
@@ -24,5 +22,3 @@ ENTRYPOINT ["bin/main"]
 # WORKDIR /app
 
 # COPY --from=base /app/bin/main .
-
-# ENTRYPOINT ["./main"]

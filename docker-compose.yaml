@@ -1,4 +1,30 @@
 services:
+    cli:
+        container_name: go_hexagonal_cli
+        tty: true
+        stdin_open: true
+        build:
+            dockerfile: cmd/cli/Dockerfile
+        environment:
+            FT_MAX_GB: ${FT_MAX_GB}
+
+    tcp:
+        container_name: go_hexagonal_tcp
+        build:
+            dockerfile: cmd/tcp/Dockerfile
+        environment:
+            TCP_PORT: ${TCP_PORT}
+            FT_IP_WHITELIST: ${FT_IP_WHITELIST}
+            FT_MAX_GB: ${FT_MAX_GB}
+            FT_OUT_DIR: ${FT_OUT_DIR}
+            FT_TIMEOUT_MINS: ${FT_TIMEOUT_MINS}
+        ports:
+            - '${TCP_PORT}:${TCP_PORT}'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        volumes:
+            - tcp:/app/${FT_OUT_DIR}
+
     web:
         container_name: go_hexagonal_web
         build:
@@ -48,4 +74,6 @@ networks:
 
 volumes:
     postgres:
+        driver: local
+    tcp:
         driver: local
