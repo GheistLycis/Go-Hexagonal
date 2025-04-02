@@ -10,7 +10,7 @@ Go-based implementation of the Hexagonal Architecture (Ports and Adapters), feat
 
 ### Prerequisites
 
--   Go 1.24
+-   Go 1.24 (or Docker)
 
 ### Steps
 
@@ -28,13 +28,21 @@ To compile:
 ./scripts/build.sh <CMD="web"> <OUTPUT="main"> <OS=user_os> <ARCH=user_os_arch>
 ```
 
+Where CMD is "web", "tcp" or "cli".
+
+Or, to run with docker:
+
+```sh
+make up-<CMD>
+```
+
 ## Features 💻
 
 ### Web Server
 
 #### Prerequisites
 
--   PostgreSQL (>= 16)
+-   PostgreSQL 16.x (or Docker)
 
 Create two types in your database, user_gender and user_status, as described in `src/user/domain/user.go`.
 
@@ -80,5 +88,5 @@ bin/<BIN_PATH> <ADDRESS> <PORT> <FILE_PATH>
 -   ✅ **TCP server**: Server to receive P2P file transfers
 -   ✅ **CLI cmd**: Implement an entry point for the file_transfer module to serve as the client to the TCP server, removing the need to use external tools to send files (such as netcat)
 -   **GUI**: Build an interface to interact with both CLI and TCP commands
--   **Dockerization**: Implement Docker to avoid any initial setup
+-   ✅ **Dockerization**: Implement Docker to avoid any initial setup
 -   **Unit tests**: Implement unit test coverage

@@ -1,0 +1,79 @@
+services:
+    cli:
+        container_name: go_hexagonal_cli
+        tty: true
+        stdin_open: true
+        build:
+            dockerfile: cmd/cli/Dockerfile
+        environment:
+            FT_MAX_GB: ${FT_MAX_GB}
+
+    tcp:
+        container_name: go_hexagonal_tcp
+        build:
+            dockerfile: cmd/tcp/Dockerfile
+        environment:
+            TCP_PORT: ${TCP_PORT}
+            FT_IP_WHITELIST: ${FT_IP_WHITELIST}
+            FT_MAX_GB: ${FT_MAX_GB}
+            FT_OUT_DIR: ${FT_OUT_DIR}
+            FT_TIMEOUT_MINS: ${FT_TIMEOUT_MINS}
+        ports:
+            - '${TCP_PORT}:${TCP_PORT}'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        volumes:
+            - tcp:/app/${FT_OUT_DIR}
+
+    web:
+        container_name: go_hexagonal_web
+        build:
+            dockerfile: cmd/web/Dockerfile
+        environment:
+            WEB_PORT: ${WEB_PORT}
+            DB_AUTO_MIGRATE: ${DB_AUTO_MIGRATE}
+            DB_HOST: database
+            DB_NAME: ${DB_NAME}
+            DB_PASSWORD: ${DB_PASSWORD}
+            DB_PORT: 5432
+            DB_USER: ${DB_USER}
+        ports:
+            - '${WEB_PORT}:${WEB_PORT}'
+        volumes:
+            - postgres:/var/lib/postgresql/data
+        networks:
+            - shared
+        depends_on:
+            database:
+                condition: service_healthy
+
+    database:
+        container_name: go_hexagonal_db
+        build:
+            dockerfile: infra/postgres/Dockerfile
+        environment:
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_DB: ${DB_NAME}
+        ports:
+            - '${DB_PORT:-5432}:5432'
+        volumes:
+            - postgres:/var/lib/postgresql/data
+        networks:
+            - shared
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+            retries: 5
+            interval: 5s
+            timeout: 2s
+            start_period: 5s
+
+networks:
+    shared:
+        driver: bridge
+
+volumes:
+    postgres:
+        driver: local
+    tcp:
+        driver: local

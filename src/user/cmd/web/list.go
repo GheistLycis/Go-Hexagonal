@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	uuid "github.com/satori/go.uuid"
 )
 
 func list(c *gin.Context, s domain.UserServicePort) {
@@ -46,7 +47,7 @@ func list(c *gin.Context, s domain.UserServicePort) {
 }
 
 type listUserRes struct {
-	ID        string        `json:"id" binding:"required"`
+	ID        uuid.UUID     `json:"id" binding:"required"`
 	Status    domain.Status `json:"status" binding:"required"`
 	Name      string        `json:"name" binding:"required"`
 	Email     string        `json:"email" binding:"required"`

@@ -14,7 +14,7 @@ func init() {
 }
 
 type User struct {
-	ID        string    `valid:"uuidv4"`
+	ID        uuid.UUID `valid:"uuidv4"`
 	Status    Status    `valid:"-"`
 	Name      string    `valid:"-"`
 	Email     string    `valid:"email"`
@@ -24,7 +24,7 @@ type User struct {
 
 func NewUser(name string, email string, gender Gender, BirthDate time.Time) (*User, error) {
 	user := &User{
-		ID:        uuid.NewV4().String(),
+		ID:        uuid.NewV4(),
 		Status:    IN_ANALYSIS,
 		Name:      name,
 		Email:     email,
@@ -79,7 +79,7 @@ func (u *User) Disable() error {
 	return u.Validate()
 }
 
-func (u *User) GetID() string           { return u.ID }
+func (u *User) GetID() uuid.UUID        { return u.ID }
 func (u *User) GetStatus() Status       { return u.Status }
 func (u *User) GetName() string         { return u.Name }
 func (u *User) GetEmail() string        { return u.Email }
