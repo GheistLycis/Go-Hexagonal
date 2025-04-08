@@ -37,3 +37,13 @@ compose-up-web:
 
 compose-build-web:
 	docker compose up -d --build web database
+
+
+# * ==TESTING==
+.PHONY: test test-verbose
+
+test:
+	go test -cover -coverprofile=coverage.out -race ./src/...
+
+test-verbose:
+	go test -cover -coverprofile=coverage.out -race -v ./src/...

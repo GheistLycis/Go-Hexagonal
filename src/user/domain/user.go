@@ -5,31 +5,29 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/asaskevich/govalidator"
-	uuid "github.com/satori/go.uuid"
+	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
-func init() {
-	govalidator.SetFieldsRequiredByDefault(true)
-}
+var validate = validator.New()
 
 type User struct {
-	ID        uuid.UUID `valid:"uuidv4"`
-	Status    Status    `valid:"-"`
-	Name      string    `valid:"-"`
-	Email     string    `valid:"email"`
-	Gender    Gender    `valid:"-"`
-	BirthDate time.Time `valid:"-"`
+	ID        uuid.UUID `validate:"uuid4"`
+	Status    Status
+	Name      string
+	Email     string `validate:"email"`
+	Gender    Gender
+	BirthDate time.Time
 }
 
-func NewUser(name string, email string, gender Gender, BirthDate time.Time) (*User, error) {
+func NewUser(name string, email string, gender Gender, birthDate time.Time) (*User, error) {
 	user := &User{
-		ID:        uuid.NewV4(),
+		ID:        uuid.New(),
 		Status:    IN_ANALYSIS,
 		Name:      name,
 		Email:     email,
 		Gender:    gender,
-		BirthDate: BirthDate,
+		BirthDate: birthDate,
 	}
 
 	if err := user.Validate(); err != nil {
@@ -40,7 +38,7 @@ func NewUser(name string, email string, gender Gender, BirthDate time.Time) (*Us
 }
 
 func (u *User) Validate() error {
-	if _, err := govalidator.ValidateStruct(u); err != nil {
+	if err := validate.Struct(u); err != nil {
 		return err
 	}
 

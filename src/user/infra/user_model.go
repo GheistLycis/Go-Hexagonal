@@ -4,7 +4,7 @@ import (
 	domain "Go-Hexagonal/src/user/domain"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 

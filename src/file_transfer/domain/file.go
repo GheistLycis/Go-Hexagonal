@@ -10,10 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asaskevich/govalidator"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 )
 
+var validate = validator.New()
 var maxSize int64
 
 func init() {
@@ -27,14 +28,13 @@ func init() {
 	}
 	maxSize = int64(maxSizeGb * 1024 * 1024 * 1024)
 
-	govalidator.SetFieldsRequiredByDefault(true)
 }
 
 type File struct {
-	Name      string   `valid:"-"`
-	Extension string   `valid:"-"`
-	Size      int64    `valid:"-"`
-	Reference *os.File `valid:"-"`
+	Name      string
+	Extension string
+	Size      int64
+	Reference *os.File
 }
 
 func NewFile(name string, extension string, size int64, reference *os.File) (*File, error) {
@@ -57,7 +57,7 @@ func NewFile(name string, extension string, size int64, reference *os.File) (*Fi
 }
 
 func (f *File) Validate() error {
-	if _, err := govalidator.ValidateStruct(f); err != nil {
+	if err := validate.Struct(f); err != nil {
 		return err
 	}
 
