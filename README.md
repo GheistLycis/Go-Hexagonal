@@ -26,15 +26,12 @@ To compile:
 
 ```sh
 ./scripts/build.sh <CMD="web"> <OUTPUT="main"> <OS=user_os> <ARCH=user_os_arch>
+
+# Or
+make build ARGS="<CMD="web"> <OUTPUT="main"> <OS=user_os> <ARCH=user_os_arch>"
 ```
 
 Where CMD is "web", "tcp" or "cli".
-
-Or, to run with docker:
-
-```sh
-make up-<CMD>
-```
 
 ## Features 💻
 
@@ -52,6 +49,12 @@ Start the HTTP server with:
 
 ```sh
 ./scripts/web.sh
+
+# Or
+make web
+
+# Or, with Docker
+make compose-up-web
 ```
 
 Access it at `http://localhost:<WEB_PORT>`
@@ -64,6 +67,12 @@ Start the TCP server to receive files with:
 
 ```sh
 ./scripts/tcp.sh
+
+# Or
+make tcp
+
+# Or, with Docker
+make compose-up-tcp
 ```
 
 ### CLI
@@ -74,12 +83,12 @@ Start the CLI to send files to the TCP server with:
 
 ```sh
 ./scripts/cli.sh <ADDRESS> <PORT> <FILE_PATH>
-```
 
-Or, if you're running the compiled app:
+# Or
+make cli <ADDRESS> <PORT> <FILE_PATH>
 
-```sh
-bin/<BIN_PATH> <ADDRESS> <PORT> <FILE_PATH>
+# Or, with Docker
+make compose-up-cli <ADDRESS> <PORT> <FILE_PATH>
 ```
 
 ## Roadmap 🚀

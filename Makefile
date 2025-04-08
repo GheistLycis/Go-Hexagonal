@@ -1,19 +1,39 @@
-.PHONY: build-tcp up-tcp build-web up-web
+# * ==SCRIPTS==
+.PHONY: build cli tcp web
+
+build:
+	./scripts/build.sh $(ARGS)
+
+cli:
+	./scripts/cli.sh $(ARGS)
+
+tcp:
+	./scripts/tcp.sh
+
+web:
+	./scripts/web.sh
+
+
+# * ==DOCKER COMPOSE==
+.PHONY: compose-up-cli compose-build-cli compose-up-tcp compose-build-tcp compose-up-web compose-build-web
 
 # CLI
-build-cli:
-	docker compose up --build cli
-up-cli:
-	docker compose up cli
+compose-up-cli:
+	docker compose up cli $(ARGS)
+
+compose-build-cli:
+	docker compose up --build cli $(ARGS)
 
 # TCP
-build-tcp:
-	docker compose up -d --build tcp
-up-tcp:
+compose-up-tcp:
 	docker compose up -d tcp
 
+compose-build-tcp:
+	docker compose up -d --build tcp
+
 # WEB
-build-web:
-	docker compose up -d --build web database
-up-web:
+compose-up-web:
 	docker compose up -d web database
+
+compose-build-web:
+	docker compose up -d --build web database
