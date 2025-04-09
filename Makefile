@@ -14,28 +14,28 @@ web:
 	./scripts/web.sh
 
 
-# * ==DOCKER COMPOSE==
-.PHONY: compose-cli compose-build-cli compose-tcp compose-build-tcp compose-web compose-build-web
+# * ==DOCKER==
+.PHONY: docker-cli docker-build-cli docker-tcp docker-build-tcp docker-web docker-build-web
 
 # CLI
-compose-cli:
+docker-cli:
 	docker compose up cli $(ARGS)
 
-compose-build-cli:
+docker-build-cli:
 	docker compose up --build cli $(ARGS)
 
 # TCP
-compose-tcp:
+docker-tcp:
 	docker compose up -d tcp
 
-compose-build-tcp:
+docker-build-tcp:
 	docker compose up -d --build tcp
 
 # WEB
-compose-web:
+docker-web:
 	docker compose up -d web database
 
-compose-build-web:
+docker-build-web:
 	docker compose up -d --build web database
 
 

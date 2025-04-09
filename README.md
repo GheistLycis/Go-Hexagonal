@@ -54,7 +54,7 @@ Start the HTTP server with:
 make web
 
 # Or, with Docker
-make compose-web
+make docker-web
 ```
 
 Access it at `http://localhost:<WEB_PORT>`
@@ -72,7 +72,7 @@ Start the TCP server to receive files with:
 make tcp
 
 # Or, with Docker
-make compose-tcp
+make docker-tcp
 ```
 
 ### CLI
@@ -88,7 +88,7 @@ Start the CLI to send files to the TCP server with:
 make cli <ADDRESS> <PORT> <FILE_PATH>
 
 # Or, with Docker
-make compose-cli <ADDRESS> <PORT> <FILE_PATH>
+make docker-cli <ADDRESS> <PORT> <FILE_PATH>
 ```
 
 ## DevOps 🔨
