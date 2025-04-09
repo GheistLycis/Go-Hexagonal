@@ -39,11 +39,14 @@ compose-build-web:
 	docker compose up -d --build web database
 
 
-# * ==TESTING==
-.PHONY: test test-verbose
+# * ==DEV OPS==
+.PHONY: test test-verbose audit
 
 test:
 	go test -cover -coverprofile=coverage.out -race ./src/...
 
 test-verbose:
 	go test -cover -coverprofile=coverage.out -race -v ./src/...
+
+audit:
+	govulncheck ./...

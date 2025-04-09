@@ -33,7 +33,7 @@ make build ARGS="<CMD="web"> <OUTPUT="main"> <OS=user_os> <ARCH=user_os_arch>"
 
 Where CMD is "web", "tcp" or "cli".
 
-## Features 💻
+## Features 🌟
 
 ### Web Server
 
@@ -89,6 +89,23 @@ make cli <ADDRESS> <PORT> <FILE_PATH>
 
 # Or, with Docker
 make compose-cli <ADDRESS> <PORT> <FILE_PATH>
+```
+
+## DevOps 🔨
+
+### Test
+
+```sh
+make test
+
+# Or
+make test-verbose
+```
+
+### Audit
+
+```sh
+make audit
 ```
 
 ## Roadmap 🚀
