@@ -15,24 +15,24 @@ web:
 
 
 # * ==DOCKER COMPOSE==
-.PHONY: compose-up-cli compose-build-cli compose-up-tcp compose-build-tcp compose-up-web compose-build-web
+.PHONY: compose-cli compose-build-cli compose-tcp compose-build-tcp compose-web compose-build-web
 
 # CLI
-compose-up-cli:
+compose-cli:
 	docker compose up cli $(ARGS)
 
 compose-build-cli:
 	docker compose up --build cli $(ARGS)
 
 # TCP
-compose-up-tcp:
+compose-tcp:
 	docker compose up -d tcp
 
 compose-build-tcp:
 	docker compose up -d --build tcp
 
 # WEB
-compose-up-web:
+compose-web:
 	docker compose up -d web database
 
 compose-build-web:
