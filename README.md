@@ -25,10 +25,10 @@ Set a `.env` according to the `env.example` in the root.
 To compile:
 
 ```sh
-./scripts/build.sh <CMD="web"> <OUTPUT="main"> <OS=user_os> <ARCH=user_os_arch>
+./scripts/build.sh <CMD=web> <OUTPUT=main> <OS=user_os> <ARCH=user_os_arch>
 
 # Or
-make build ARGS="<CMD="web"> <OUTPUT="main"> <OS=user_os> <ARCH=user_os_arch>"
+make build ARGS="<CMD=web> <OUTPUT=main> <OS=user_os> <ARCH=user_os_arch>"
 ```
 
 Where CMD is "web", "tcp" or "cli".
@@ -41,7 +41,7 @@ Where CMD is "web", "tcp" or "cli".
 
 -   PostgreSQL 16.x (or Docker)
 
-Create two types in your database, user_gender and user_status, as described in `src/user/domain/user.go`.
+Create two types in your database, user_gender and user_status, as described in `src/user/domain`.
 
 #### Usage
 
