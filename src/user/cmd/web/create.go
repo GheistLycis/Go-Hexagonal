@@ -2,6 +2,7 @@ package user
 
 import (
 	domain "Go-Hexagonal/src/user/domain"
+	ports "Go-Hexagonal/src/user/ports"
 	"net/http"
 	"time"
 
@@ -9,8 +10,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func create(c *gin.Context, s domain.UserServicePort) {
-	payload := domain.CreateUserServiceDTO{}
+func create(c *gin.Context, s ports.UserServicePort) {
+	payload := ports.CreateUserServiceDTO{}
 	createdBy := c.GetHeader("userEmail")
 
 	if err := c.ShouldBindJSON(&payload); err != nil {

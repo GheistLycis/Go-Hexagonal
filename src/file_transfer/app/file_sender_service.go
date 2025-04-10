@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	domain "Go-Hexagonal/src/file_transfer/domain"
+	ports "Go-Hexagonal/src/file_transfer/ports"
 )
 
 type FileSenderService struct {
@@ -36,7 +37,7 @@ func (s *FileSenderService) HandleConnection(fp string) {
 	s.waitForConfirmation()
 }
 
-func (s *FileSenderService) getFile(fp string) (domain.FilePort, error) {
+func (s *FileSenderService) getFile(fp string) (ports.FilePort, error) {
 	osFile, err := os.Open(fp)
 	if err != nil {
 		return nil, err
@@ -66,7 +67,7 @@ func (s *FileSenderService) getFile(fp string) (domain.FilePort, error) {
 	return file, nil
 }
 
-func (s *FileSenderService) upload(f domain.FilePort) error {
+func (s *FileSenderService) upload(f ports.FilePort) error {
 	defer f.GetReference().Close()
 
 	if err := json.NewEncoder(s.conn).Encode(f); err != nil {

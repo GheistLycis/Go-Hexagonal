@@ -2,6 +2,7 @@ package user
 
 import (
 	domain "Go-Hexagonal/src/user/domain"
+	ports "Go-Hexagonal/src/user/ports"
 	"net/http"
 	"time"
 
@@ -9,10 +10,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func getById(c *gin.Context, s domain.UserServicePort) {
+func getById(c *gin.Context, s ports.UserServicePort) {
 	id := c.Param("id")
 
-	user, err := s.Get(domain.GetUserServiceFiltersDTO{ID: &id})
+	user, err := s.Get(ports.GetUserServiceFiltersDTO{ID: &id})
 	if err != nil {
 		c.JSON(http.StatusNotFound, err.Error())
 		return
