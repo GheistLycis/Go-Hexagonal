@@ -2,19 +2,18 @@ package user
 
 import (
 	domain "Go-Hexagonal/src/user/domain"
-
-	"gorm.io/gorm"
+	ports "Go-Hexagonal/src/user/ports"
 )
 
 type UserRepository struct {
-	conn *gorm.DB
+	db ports.DBConnectionPort
 }
 
-func NewUserRepo(c *gorm.DB) *UserRepository { // TODO: use generic interface for DB adapter
-	return &UserRepository{conn: c}
+func NewUserRepo(db ports.DBConnectionPort) *UserRepository {
+	return &UserRepository{db}
 }
 
-func (r *UserRepository) Create(u domain.UserPort, createdBy string) (*domain.User, error) {
+func (r *UserRepository) Create(u ports.UserPort, c string) (*domain.User, error) {
 	user := &UserModel{
 		ID:        u.GetID(),
 		Status:    u.GetStatus(),
@@ -22,11 +21,11 @@ func (r *UserRepository) Create(u domain.UserPort, createdBy string) (*domain.Us
 		Email:     u.GetEmail(),
 		Gender:    u.GetGender(),
 		BirthDate: u.GetBirthDate(),
-		CreatedBy: createdBy,
+		CreatedBy: c,
 	}
 
-	if res := r.conn.Create(&user); res.Error != nil {
-		return nil, res.Error
+	if err := r.db.Insert(&user); err != nil {
+		return nil, err
 	}
 
 	return &domain.User{
@@ -39,11 +38,11 @@ func (r *UserRepository) Create(u domain.UserPort, createdBy string) (*domain.Us
 	}, nil
 }
 
-func (r *UserRepository) Get(f domain.GetUserRepoFiltersDTO) (*domain.User, error) {
+func (r *UserRepository) Get(f ports.GetUserRepoFiltersDTO) (*domain.User, error) {
 	user := &UserModel{}
 
-	if res := r.conn.First(user, f); res.Error != nil {
-		return nil, res.Error
+	if err := r.db.Get(&user, f); err != nil {
+		return nil, err
 	}
 
 	return &domain.User{
@@ -56,11 +55,11 @@ func (r *UserRepository) Get(f domain.GetUserRepoFiltersDTO) (*domain.User, erro
 	}, nil
 }
 
-func (r *UserRepository) List(f domain.ListUsersRepoFiltersDTO) ([]*domain.User, error) {
+func (r *UserRepository) List(f ports.ListUsersRepoFiltersDTO) ([]*domain.User, error) {
 	users := []UserModel{}
 
-	if res := r.conn.Find(&users); res.Error != nil {
-		return nil, res.Error
+	if err := r.db.List(&users); err != nil {
+		return nil, err
 	}
 
 	listUsers := make([]*domain.User, len(users))
@@ -79,7 +78,7 @@ func (r *UserRepository) List(f domain.ListUsersRepoFiltersDTO) ([]*domain.User,
 	return listUsers, nil
 }
 
-func (r *UserRepository) Update(u domain.UserPort, updatedBy string) (*domain.User, error) {
+func (r *UserRepository) Update(u ports.UserPort, ub string) (*domain.User, error) {
 	user := &UserModel{
 		ID:        u.GetID(),
 		Status:    u.GetStatus(),
@@ -87,11 +86,11 @@ func (r *UserRepository) Update(u domain.UserPort, updatedBy string) (*domain.Us
 		Email:     u.GetEmail(),
 		Gender:    u.GetGender(),
 		BirthDate: u.GetBirthDate(),
-		UpdatedBy: &updatedBy,
+		UpdatedBy: &ub,
 	}
 
-	if res := r.conn.Updates(&user); res.Error != nil {
-		return nil, res.Error
+	if err := r.db.Update(&user); err != nil {
+		return nil, err
 	}
 
 	return &domain.User{

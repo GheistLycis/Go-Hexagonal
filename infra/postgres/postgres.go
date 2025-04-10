@@ -23,9 +23,11 @@ func Init() *gorm.DB {
 	dsn := getDSN()
 	conn := connect(dsn)
 
-	if autoMigrateDB, err := strconv.ParseBool(os.Getenv("DB_AUTO_MIGRATE")); err != nil {
+	autoMigrateDB, err := strconv.ParseBool(os.Getenv("DB_AUTO_MIGRATE"))
+	if err != nil {
 		log.Fatal("[DB] Error while parsing ENV variable DB_AUTO_MIGRATE -", err)
-	} else if autoMigrateDB {
+	}
+	if autoMigrateDB {
 		migrate(conn)
 	}
 

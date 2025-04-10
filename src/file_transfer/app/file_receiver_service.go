@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	domain "Go-Hexagonal/src/file_transfer/domain"
+	ports "Go-Hexagonal/src/file_transfer/ports"
 
 	"github.com/joho/godotenv"
 )
@@ -89,7 +90,7 @@ func (s *FileReceiverService) createFile(f string) (*domain.File, string, error)
 	return &file, outPath, nil
 }
 
-func (s *FileReceiverService) download(f domain.FilePort) error {
+func (s *FileReceiverService) download(f ports.FilePort) error {
 	defer f.GetReference().Close()
 
 	if _, err := io.CopyN(f.GetReference(), s.conn, f.GetSize()); err != nil {
