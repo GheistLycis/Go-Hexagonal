@@ -14,7 +14,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var validate = validator.New()
+var validate = validator.New() // TODO: implement singleton validator
 var maxSize int64
 
 func init() {

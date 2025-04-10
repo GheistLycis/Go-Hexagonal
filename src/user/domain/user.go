@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var validate = validator.New()
+var validate = validator.New() // TODO: implement singleton validator
 
 type User struct {
 	ID        uuid.UUID `validate:"uuid4"`
