@@ -6,9 +6,6 @@ import (
 	"strconv"
 )
 
-/*
-Init starts CLI program, handling args and passing them to the file_transfer module.
-*/
 func Init(args []string) {
 	port, err := strconv.Atoi(args[1])
 	if err != nil {

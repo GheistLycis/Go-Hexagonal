@@ -13,11 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-/*
-Init creates the server, set its routers and handlers and then runs it.
-
--DB: the database connection
-*/
 func Init(DB *gorm.DB) {
 	defer func() {
 		if r := recover(); r != nil {

@@ -31,9 +31,6 @@ func init() {
 	timeOut = time.Duration(timeOutMins)
 }
 
-/*
-HandleServer handles active listener to receive incoming files from any allowed dials, in parallel.
-*/
 func HandleServer(l net.Listener) {
 	defer l.Close()
 

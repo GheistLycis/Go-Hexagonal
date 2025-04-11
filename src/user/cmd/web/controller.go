@@ -10,12 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-/*
-SetRouter maps all routes in User context to their handlers.
-
--g: the gin server
--db: the database active connection
-*/
 func SetRouter(g *gin.Engine, db *gorm.DB) {
 	dbAdapter := postgres_adapters.NewGormAdapter(db) // ? implement singleton deps container
 	repo := infra.NewUserRepo(dbAdapter)

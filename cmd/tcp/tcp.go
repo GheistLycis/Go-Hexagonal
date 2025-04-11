@@ -9,9 +9,6 @@ import (
 	"strconv"
 )
 
-/*
-Init starts a TCP server.
-*/
 func Init() {
 	serverPort, err := strconv.ParseInt(os.Getenv("TCP_PORT"), 10, 64)
 	if err != nil {

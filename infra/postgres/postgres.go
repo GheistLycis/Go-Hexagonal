@@ -12,13 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-/*
-Init generates the DSN string from .env and connects to the database.
-
-Returns the active connection.
-
--m: whether to auto-migrate every mapped model.
-*/
 func Init() *gorm.DB {
 	dsn := getDSN()
 	conn := connect(dsn)
