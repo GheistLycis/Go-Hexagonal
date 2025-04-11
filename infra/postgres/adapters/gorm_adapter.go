@@ -46,7 +46,7 @@ func (a *GormAdapter) Upsert(v any) error {
 	return result.Error
 }
 
-func (a *GormAdapter) Raw(d any, q string, v ...any) error {
+func (a *GormAdapter) Query(d any, q string, v ...any) error {
 	if d != nil {
 		return a.db.Raw(q, v...).Scan(d).Error
 	}
