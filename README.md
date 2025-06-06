@@ -5,6 +5,7 @@ Go-based implementation of the Hexagonal Architecture (Ports and Adapters), feat
 -   Web server implemented with Gin
 -   Database handling with GORM and PostgreSQL
 -   TCP file transfer service
+-   PNG Steganography
 
 ## Installation 🔧
 
@@ -75,20 +76,36 @@ make tcp
 make docker-tcp
 ```
 
-### CLI
+### TCP Sender
 
 #### Usage
 
 Start the CLI to send files to the TCP server with:
 
 ```sh
-./scripts/cli.sh <ADDRESS> <PORT> <FILE_PATH>
+./scripts/cli.sh tcp <ADDRESS> <PORT> <FILE_PATH>
 
 # Or
-make cli <ADDRESS> <PORT> <FILE_PATH>
+make cli tcp <ADDRESS> <PORT> <FILE_PATH>
 
 # Or, with Docker
-make docker-cli <ADDRESS> <PORT> <FILE_PATH>
+make docker-cli tcp <ADDRESS> <PORT> <FILE_PATH>
+```
+
+### Steganography
+
+#### Usage
+
+Start the CLI to code/decode messages within PNGs with:
+
+```sh
+./scripts/cli.sh steg
+
+# Or
+make cli steg
+
+# Or, with Docker
+make docker-cli steg
 ```
 
 ## DevOps 🔨
