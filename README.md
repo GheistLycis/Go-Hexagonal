@@ -60,7 +60,7 @@ make docker-web
 
 Access it at `http://localhost:<WEB_PORT>`
 
-### TCP Server
+### TCP File Transfer
 
 #### Usage
 
@@ -75,10 +75,6 @@ make tcp
 # Or, with Docker
 make docker-tcp
 ```
-
-### TCP Sender
-
-#### Usage
 
 Start the CLI to send files to the TCP server with:
 
@@ -96,16 +92,30 @@ make docker-cli tcp <ADDRESS> <PORT> <FILE_PATH>
 
 #### Usage
 
-Start the CLI to code/decode messages within PNGs with:
+Start the CLI to encode messages within PNGs with:
 
 ```sh
-./scripts/cli.sh steg
+./scripts/cli.sh steg encode <FILE_PATH> <MESSAGE>
 
 # Or
-make cli steg
+make cli steg encode <FILE_PATH> <MESSAGE>
 
 # Or, with Docker
-make docker-cli steg
+make docker-cli steg encode <FILE_PATH> <MESSAGE>
+```
+
+The original file won't be altered. Instead, a copy will be saved in the same folder as the original (with "\_encoded" appended in the name).
+
+Start the CLI to decode messages within PNGs with:
+
+```sh
+./scripts/cli.sh steg decode <FILE_PATH>
+
+# Or
+make cli steg decode <FILE_PATH>
+
+# Or, with Docker
+make docker-cli steg decode <FILE_PATH>
 ```
 
 ## DevOps 🔨
