@@ -16,7 +16,7 @@ func NewImageCodecService(c *CodecService) *ImageCodecService {
 	}
 }
 
-func (s *ImageCodecService) Encode(img image.Image, message string) *image.RGBA {
+func (s *ImageCodecService) Encode(img image.Image, msg string) *image.RGBA {
 	bounds := img.Bounds()
 	rgba := image.NewRGBA(bounds)
 	msgBits := []uint8{}
@@ -27,8 +27,8 @@ func (s *ImageCodecService) Encode(img image.Image, message string) *image.RGBA 
 		}
 	}
 
-	for i := range len(message) {
-		msgBits = append(msgBits, s.ByteToBits(message[i])...)
+	for i := range len(msg) {
+		msgBits = append(msgBits, s.ByteToBits(msg[i])...)
 	}
 
 	msgBits = append(msgBits, s.ByteToBits(0)...)
