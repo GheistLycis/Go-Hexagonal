@@ -42,7 +42,7 @@ Where CMD is "web", "tcp" or "cli".
 
 -   PostgreSQL 16.x (or Docker)
 
-Create two types in your database, user_gender and user_status, as described in `src/user/domain`.
+If not using Docker, create two types in your database, user_gender and user_status, as described in `src/user/domain`.
 
 #### Usage
 
