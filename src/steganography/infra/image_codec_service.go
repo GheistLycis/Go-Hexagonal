@@ -11,10 +11,8 @@ type ImageCodecService struct {
 	CodecService
 }
 
-func NewImageCodecService(c *CodecService) *ImageCodecService {
-	return &ImageCodecService{
-		CodecService: *c,
-	}
+func NewImageCodecService() *ImageCodecService {
+	return &ImageCodecService{}
 }
 
 func (s *ImageCodecService) Encode(img image.Image, msg string) *image.RGBA {

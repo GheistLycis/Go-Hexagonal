@@ -7,8 +7,7 @@ import (
 )
 
 func HandleCommands(cmd CommandDTO) {
-	codecService := infra.NewCodecService()
-	imgCodecService := infra.NewImageCodecService(codecService)
+	imgCodecService := infra.NewImageCodecService()
 	codecImagService := app.NewCodecImageService(imgCodecService)
 
 	// TODO: auto detect file type and encode more than just images

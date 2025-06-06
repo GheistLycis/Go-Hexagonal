@@ -1,7 +1,7 @@
 package steganography
 
 import (
-	infra "Go-Hexagonal/src/steganography/infra"
+	ports "Go-Hexagonal/src/steganography/ports"
 
 	"image/png"
 	"log"
@@ -11,10 +11,10 @@ import (
 )
 
 type CodecImageService struct {
-	ImageCodecService *infra.ImageCodecService
+	ImageCodecService ports.ImageCodecServicePort
 }
 
-func NewCodecImageService(s *infra.ImageCodecService) *CodecImageService {
+func NewCodecImageService(s ports.ImageCodecServicePort) *CodecImageService {
 	return &CodecImageService{
 		ImageCodecService: s,
 	}
