@@ -28,7 +28,17 @@ func Init(args []string) {
 
 		file_transfer.HandleCommands(cmd)
 	case "steg":
-		cmd := steganography.CommandDTO{}
+		msg := ""
+
+		if len(args) > 2 {
+			msg = args[2]
+		}
+
+		cmd := steganography.CommandDTO{
+			Operation: args[0],
+			FilePath:  args[1],
+			Message:   msg,
+		}
 
 		steganography.HandleCommands(cmd)
 	default:

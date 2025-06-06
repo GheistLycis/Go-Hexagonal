@@ -2,57 +2,28 @@ package steganography
 
 import (
 	app "Go-Hexagonal/src/steganography/app"
-	"image/png"
+	infra "Go-Hexagonal/src/steganography/infra"
 	"log"
-	"os"
 )
 
-var hiddenMessage = "Secret message!"
-var codecService = app.NewCodecService()
-var imgCodecService = app.NewImageCodecService(codecService)
-
 func HandleCommands(cmd CommandDTO) {
-	encode()
-	decode()
+	codecService := infra.NewCodecService()
+	imgCodecService := infra.NewImageCodecService(codecService)
+	codecImagService := app.NewCodecImageService(imgCodecService)
+
+	// TODO: auto detect file type and encode more than just images
+	switch cmd.Operation {
+	case "encode":
+		codecImagService.Encode(cmd.FilePath, cmd.Message)
+	case "decode":
+		codecImagService.Decode(cmd.FilePath)
+	default:
+		log.Fatalf("Unexpected operation \"%s\". Should be either \"encode\" or \"decode\"", cmd.Operation)
+	}
 }
 
 type CommandDTO struct {
-}
-
-func encode() {
-	inFile, err := os.Open("input.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer inFile.Close()
-
-	img, err := png.Decode(inFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	encodedImg := imgCodecService.Encode(img, hiddenMessage)
-
-	outFile, err := os.Create("output.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer outFile.Close()
-
-	png.Encode(outFile, encodedImg)
-}
-
-func decode() {
-	inFile2, err := os.Open("output.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer inFile2.Close()
-
-	decodedImg, err := png.Decode(inFile2)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Println("Recovered message:", imgCodecService.Decode(decodedImg))
+	Operation string
+	FilePath  string
+	Message   string
 }
