@@ -4,6 +4,7 @@ import (
 	"errors"
 	"image"
 	"image/color"
+	"image/draw"
 )
 
 type ImageCodecService struct {
@@ -18,38 +19,35 @@ func NewImageCodecService(c *CodecService) *ImageCodecService {
 
 func (s *ImageCodecService) Encode(img image.Image, msg string) *image.RGBA {
 	bounds := img.Bounds()
+	minX, maxX, minY, maxY := bounds.Min.X, bounds.Max.X, bounds.Min.Y, bounds.Max.Y
+
 	rgba := image.NewRGBA(bounds)
+	draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
+
 	msgBits := []uint8{}
-
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			rgba.Set(x, y, img.At(x, y))
-		}
-	}
-
 	for i := range len(msg) {
 		msgBits = append(msgBits, s.ByteToBits(msg[i])...)
 	}
-
 	msgBits = append(msgBits, s.ByteToBits(0)...)
 
-	bitI := 0
-	for y := bounds.Min.Y; y < bounds.Max.Y && bitI < len(msgBits); y++ {
-		for x := bounds.Min.X; x < bounds.Max.X && bitI < len(msgBits); x++ {
+	msgBitsLen := len(msgBits)
+	msgBitIdx := 0
+	for x := minX; x < maxX && msgBitIdx < msgBitsLen; x++ {
+		for y := minY; y < maxY && msgBitIdx < msgBitsLen; y++ {
 			r, g, b, a := s.getPixelBytes(rgba, x, y)
 
 			// * LSB
-			if bitI < len(msgBits) {
-				r = (r & 0xFE) | msgBits[bitI]
-				bitI++
+			if msgBitIdx < msgBitsLen {
+				r = (r & 0xFE) | msgBits[msgBitIdx]
+				msgBitIdx++
 			}
-			if bitI < len(msgBits) {
-				g = (g & 0xFE) | msgBits[bitI]
-				bitI++
+			if msgBitIdx < msgBitsLen {
+				g = (g & 0xFE) | msgBits[msgBitIdx]
+				msgBitIdx++
 			}
-			if bitI < len(msgBits) {
-				b = (b & 0xFE) | msgBits[bitI]
-				bitI++
+			if msgBitIdx < msgBitsLen {
+				b = (b & 0xFE) | msgBits[msgBitIdx]
+				msgBitIdx++
 			}
 
 			rgba.Set(x, y, color.RGBA{r, g, b, a})
@@ -61,26 +59,28 @@ func (s *ImageCodecService) Encode(img image.Image, msg string) *image.RGBA {
 
 func (s *ImageCodecService) Decode(img image.Image) (string, error) {
 	bounds := img.Bounds()
-	bits := []uint8{}
+	minX, maxX, minY, maxY := bounds.Min.X, bounds.Max.X, bounds.Min.Y, bounds.Max.Y
+	msgBits := []uint8{}
 
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+	for x := minX; x < maxX; x++ {
+		for y := minY; y < maxY; y++ {
 			r, g, b, _ := s.getPixelBytes(img, x, y)
 
 			// * LSB
-			bits = append(bits, r&1, g&1, b&1)
+			msgBits = append(msgBits, r&1, g&1, b&1)
+			msgBitsLen := len(msgBits)
 
-			if len(bits) >= 8 && len(bits)%8 == 0 {
-				lastByte := s.BitsToByte(bits[len(bits)-8:])
+			if msgBitsLen >= 8 && msgBitsLen%8 == 0 {
+				lastByte := s.BitsToByte(msgBits[msgBitsLen-8:])
 
 				if lastByte == 0 {
-					message := []byte{}
+					msg := []byte{}
 
-					for i := 0; i < len(bits)-8; i += 8 {
-						message = append(message, s.BitsToByte(bits[i:i+8]))
+					for i := 0; i < msgBitsLen-8; i += 8 {
+						msg = append(msg, s.BitsToByte(msgBits[i:i+8]))
 					}
 
-					return string(message), nil
+					return string(msg), nil
 				}
 			}
 		}
