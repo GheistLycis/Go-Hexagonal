@@ -1,6 +1,7 @@
 package steganography
 
 import (
+	ports "Go-Hexagonal/src/steganography/ports"
 	"errors"
 	"image"
 	"image/color"
@@ -8,11 +9,11 @@ import (
 )
 
 type ImageCodecService struct {
-	CodecService
+	CodecService ports.CodecServicePort
 }
 
-func NewImageCodecService() *ImageCodecService {
-	return &ImageCodecService{}
+func NewImageCodecService(s ports.CodecServicePort) *ImageCodecService {
+	return &ImageCodecService{CodecService: s}
 }
 
 func (s *ImageCodecService) Encode(img image.Image, msg string) *image.RGBA {
@@ -24,9 +25,9 @@ func (s *ImageCodecService) Encode(img image.Image, msg string) *image.RGBA {
 
 	msgBits := []uint8{}
 	for i := range len(msg) {
-		msgBits = append(msgBits, s.ByteToBits(msg[i])...)
+		msgBits = append(msgBits, s.CodecService.ByteToBits(msg[i])...)
 	}
-	msgBits = append(msgBits, s.ByteToBits(0)...)
+	msgBits = append(msgBits, s.CodecService.ByteToBits(0)...)
 
 	msgBitsLen := len(msgBits)
 	msgBitIdx := 0
@@ -69,13 +70,13 @@ func (s *ImageCodecService) Decode(img image.Image) (string, error) {
 			msgBitsLen := len(msgBits)
 
 			if msgBitsLen >= 8 && msgBitsLen%8 == 0 {
-				lastByte := s.BitsToByte(msgBits[msgBitsLen-8:])
+				lastByte := s.CodecService.BitsToByte(msgBits[msgBitsLen-8:])
 
 				if lastByte == 0 {
 					msg := []byte{}
 
 					for i := 0; i < msgBitsLen-8; i += 8 {
-						msg = append(msg, s.BitsToByte(msgBits[i:i+8]))
+						msg = append(msg, s.CodecService.BitsToByte(msgBits[i:i+8]))
 					}
 
 					return string(msg), nil

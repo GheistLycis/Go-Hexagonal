@@ -2,7 +2,6 @@ package steganography
 
 import (
 	ports "Go-Hexagonal/src/steganography/ports"
-
 	"image/png"
 	"log"
 	"os"
@@ -15,9 +14,7 @@ type CodecImageService struct {
 }
 
 func NewCodecImageService(s ports.ImageCodecServicePort) *CodecImageService {
-	return &CodecImageService{
-		ImageCodecService: s,
-	}
+	return &CodecImageService{ImageCodecService: s}
 }
 
 func (s *CodecImageService) Encode(fp string, msg string) {
