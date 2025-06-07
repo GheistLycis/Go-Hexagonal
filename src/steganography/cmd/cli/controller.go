@@ -1,13 +1,14 @@
 package steganography
 
 import (
+	codec_infra "Go-Hexagonal/src/codec/infra"
 	app "Go-Hexagonal/src/steganography/app"
 	infra "Go-Hexagonal/src/steganography/infra"
 	"log"
 )
 
 func HandleCommands(cmd CommandDTO) {
-	codecService := infra.NewCodecService()
+	codecService := codec_infra.NewCodecService()
 	imgCodecService := infra.NewImageCodecService(codecService)
 	codecImagService := app.NewCodecImageService(imgCodecService)
 

@@ -1,4 +1,4 @@
-package steganography
+package codec
 
 import "errors"
 

@@ -9,11 +9,11 @@ import (
 )
 
 type ImageCodecService struct {
-	CodecService ports.CodecServicePort
+	codecService ports.CodecServicePort
 }
 
 func NewImageCodecService(s ports.CodecServicePort) *ImageCodecService {
-	return &ImageCodecService{CodecService: s}
+	return &ImageCodecService{codecService: s}
 }
 
 func (s *ImageCodecService) Encode(img image.Image, msg string) *image.RGBA {
@@ -23,8 +23,8 @@ func (s *ImageCodecService) Encode(img image.Image, msg string) *image.RGBA {
 	rgba := image.NewRGBA(bounds)
 	draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
 
-	msgBits := s.CodecService.StringToBits(msg, true)
-	msgBits = append(msgBits, s.CodecService.ByteToBits(0, true)...)
+	msgBits := s.codecService.StringToBits(msg, true)
+	msgBits = append(msgBits, s.codecService.ByteToBits(0, true)...)
 	msgBitsLen := len(msgBits)
 
 	msgBitIdx := 0
@@ -67,10 +67,10 @@ func (s *ImageCodecService) Decode(img image.Image) (string, error) {
 			msgBitsLen := len(msgBits)
 
 			if msgBitsLen >= 8 && msgBitsLen%8 == 0 {
-				lastByte := s.CodecService.BitsToByte(msgBits[msgBitsLen-8:], true)
+				lastByte := s.codecService.BitsToByte(msgBits[msgBitsLen-8:], true)
 
 				if lastByte == 0 {
-					msg, err := s.CodecService.BitsToString(msgBits[:msgBitsLen-8], true)
+					msg, err := s.codecService.BitsToString(msgBits[:msgBitsLen-8], true)
 					if err != nil {
 						return "", err
 					}
